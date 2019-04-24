@@ -4,4 +4,5 @@ node_js:
 cache:
   directories:
     - "node_modules"
+install: true
 script: npm test
