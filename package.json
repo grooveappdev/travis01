@@ -10,11 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.442.0",
+    "bottleneck": "^2.18.0",
+    "elasticsearch": "^15.4.1",
     "lodash": "^4.17.11",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "shodan-client": "^3.1.4",
-    "util": "^0.11.1"
+    "toragent": "^0.1.1"
   }
 }

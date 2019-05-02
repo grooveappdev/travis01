@@ -1,31 +1,53 @@
-const _ = require('lodash');
-const request = require('request-promise');
-const shodan = require('shodan-client');
-const fs = require('fs');
-// const AWS = require('aws-sdk');
-// AWS.config.loadFromPath(options.config.keyFilename);
-// AWS.config.update({ region: options.config.region });
-// const awsS3 = new AWS.S3();
+var elasticsearch = require("elasticsearch");
 
-// var options = {
-//   uri: 'http://dummy.restapiexample.com/api/v1/employees',
-//   json: true,
-// };
-// request(options).then(data => {
-//   console.log(data.map(emp => emp.employee_name).join(', '));
+const client = new elasticsearch.Client({
+  host: "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
+  requestTimeout: 180000,
+});
+
+// client.cluster.health({},function(err, resp, status) {
+//   console.log("-- Client Health --", resp);
 // });
-const searchOpts = {
-  facets: 'port:12,country:12',
-};
-shodan.search('visual basic', '0A37HAs9cJey9gw4W7NfCFwLGk1WmQ0o', searchOpts).then(res => {
-  const matches = res.matches.slice(0, 10);
-  const data = {
-    matches,
-    facets: res.facets
+
+// client.indices.exists({  
+//   index: 'shodan_host'
+// }).then(exists => {
+//   if (exists) {
+//     return Promise.resolve('index existed');
+//   } else {
+//     return client.indices.create({  
+//       index: 'shodan_host'
+//     });
+//   }
+// });
+
+// client.count(
+//   {
+//     index: "shodan_host",
+//     type: "host",
+//     body: {
+//       query: { 'match_all': {} }
+//     }
+//   }
+// ).then(count => console.log("count", count));
+
+// client.deleteByQuery({
+//   index: 'shodan_host',
+//   type: 'host',
+//   body: {
+//     query: { 'match_all': {} }
+//   }
+// },function(err,resp,status) {
+//     console.log(err, resp);
+// });
+
+client.indices.delete({
+  index: 'van_test'
+}, function(err, res) {
+
+  if (err) {
+      console.error(err.message);
+  } else {
+      console.log('Indexes have been deleted!');
   }
-  console.log(JSON.stringify(data))
-  // fs.writeFile('./data.json', JSON.stringify(data), 'utf8', () => console.log('done'))
-  // console.log(util.inspect(res, { depth: 6 }));
-})
-console.log('lodash', _.isEmpty(2));
-console.log('TEST TRAVIS')
+});
