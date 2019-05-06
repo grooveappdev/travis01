@@ -4,7 +4,17 @@ const _ = require('lodash');
 const Bottleneck = require('bottleneck');
 // const domains = require('./domains.json');
 
-const findEmailsInHtmlBody = (html) => html.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi) || [];
+const findEmailsInHtmlBody = (html) => {
+  const lookAlikeEmails = html.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi) || []
+  if (lookAlikeEmails.length > 0) {
+    const emails = [];
+    lookAlikeEmails.map(e => (!/png/.test(e) && ! /bootstrap/.test(e)) ? emails.push(e) : null);
+
+    return emails;
+  }
+
+  return [];
+};
 
 const findContactPage = html => html.match(/<a [^>]*\bhref\s*=\s*"[^"]*contact.*?<\/a>/);
 
@@ -24,7 +34,7 @@ const crawler = new Crawler({
 });
 
 const searchContactFromWebsite = (domain) => new Promise((resolve, reject) => {
-  const emails = []
+  const emails = [];
 
   crawler.queue({
     uri: urlFormat(domain),
@@ -45,7 +55,7 @@ const searchContactFromWebsite = (domain) => new Promise((resolve, reject) => {
       emails.push(...findEmailsInHtmlBody(body));
       const contactPageTags = findContactPage(body);
       if (contactPageTags && contactPageTags[0]) {
-        const contactPage = $(contactPageTags[0]).attr('href')
+        const contactPage = $(contactPageTags[0]).attr('href');
         crawler.queue({
           uri: urlFormat(contactPage),
           callback: (contactPageError, contactPageRes, contactDone) => {
@@ -72,6 +82,7 @@ const searchContactFromWebsite = (domain) => new Promise((resolve, reject) => {
 const limiter = new Bottleneck({
   maxConcurrent: 5
 });
+
 const getDomainRegisterInfoFromWhois = (domain) => limiter.schedule(
   () => new Promise((resolve, reject) => {
     return whois(domain).then((result) => {
@@ -80,19 +91,9 @@ const getDomainRegisterInfoFromWhois = (domain) => limiter.schedule(
       return resolve({});
     });
   })
- )
+);
 
 module.exports = {
   searchContactFromWebsite,
   getDomainRegisterInfoFromWhois
 }
-// const domainss = [
-//   "commslock.com",
-//   "gmxtec.com",
-// ];
-
-// Promise.all(domainss.map(domain => getDomainRegisterInfoFromWhois(domain)))
-// .then(json => {
-//   console.log('result', json);
-// })
-// .catch(error => console.log('error', error));
