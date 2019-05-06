@@ -5,17 +5,20 @@
   "main": "index.js",
   "scripts": {
     "test": "node ./test.js",
-    "start": "node ."
+    "start": "node .",
+    "tor": "node tor.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bottleneck": "^2.18.0",
+    "crawler": "^1.2.1",
     "elasticsearch": "^15.4.1",
     "lodash": "^4.17.11",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "shodan-client": "^3.1.4",
-    "toragent": "^0.1.1"
+    "toragent": "^0.1.1",
+    "whois-json": "^2.0.4"
   }
 }

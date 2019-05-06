@@ -5,13 +5,15 @@ const request = require("request-promise");
 const TorAgent = require('toragent');
 
 class SimilarWeb {
-  constructor() {
-    this.agent = null;
-    this.maxRetry = 10;
+  constructor(options) {
+    this.minTime = options.minTime || 0;
+    this.maxConcurrent = options.maxConcurrent || null;
+    this.maxRetry = options.maxRetry || 5;
 
+    this.agent = null;
     this.limiter = new Bottleneck({
-      minTime: 1000,
-      maxConcurrent: 10
+      minTime: this.minTime,
+      maxConcurrent: this.maxConcurrent
     });
   }
   initAgent() {
@@ -25,26 +27,30 @@ class SimilarWeb {
     const maxRetry = this.maxRetry;
     const similarWebReq = () => {
       return this.agent.rotateAddress().then(() => {
-        console.log('rotate agent')
-        const agent = _.cloneDeep(this.agent);
+        // console.log('rotate agent')
         return request({
-          // uri: `https://api.similarweb.com/SimilarWebAddon/${domain}/all`,
-          uri: 'http://ip-api.com/json',
+          uri: `https://api.similarweb.com/SimilarWebAddon/${domain}/all`,
+          // uri: 'http://ip-api.com/json',
           json: true,
-          agent,
-          timeout: 60000
+          // resolveWithFullResponse: true,
+          agent: this.agent,
+          timeout: 60000,
+          headers: {
+            'Referer': 'chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp/panel/panel.html'
+          },
         }).catch(err => {
           count += 1;
-          console.log('partial error', count)
-          if (count < maxRetry) {
+          if (count < maxRetry && err.statusCode >= 500) {
             return similarWebReq();
           } else {
             return Promise.reject(err);
           }
         });
-      })
+      });
     }
-    return similarWebReq();
+    return this.limiter.schedule(() => {
+      return similarWebReq();
+    });
   }
   destroyAgent() {
     if (this.agent) {
@@ -54,11 +60,16 @@ class SimilarWeb {
   }
 }
 
-const similar = new SimilarWeb();
-similar.initAgent().then(() => {
-  console.log('create agent')
-  similar.getDomainInfo('google.com').then(info => console.log('info1', info))
-  similar.getDomainInfo('google.com').then(info => console.log('info2', info))
-});
+// const similar = new SimilarWeb({
+//   minTime: 100,
+//   maxConcurrent: 20,
+//   maxRetry: 5
+// });
+// similar.initAgent().then(() => {
+//   console.log('create agent')
+//   similar.getDomainInfo('www.unisalt-uk.com').then(res => console.log('info1', res.statusCode, res.body));
+//   // similar.getDomainInfo('google.com').then(info => console.log('info1', info));
+//   // similar.getDomainInfo('google.com').then(info => console.log('info2', info));
+// });
 
 module.exports = SimilarWeb;

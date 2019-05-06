@@ -4,8 +4,13 @@ const fs = require("fs");
 const elasticsearch = require("elasticsearch");
 const KeyObject = require('./KeyObject');
 const SimilarWeb = require('./SimilarWeb');
+const Contact = require('./contact');
 
-const similarWeb = new SimilarWeb();
+const similarWeb = new SimilarWeb({
+  minTime: 100,
+  maxConcurrent: 20,
+  maxRetry: 5
+});
 
 class ShodanElasticSearch {
   constructor(options) {
@@ -33,7 +38,7 @@ class ShodanElasticSearch {
           index: indexName,
           body: {
             settings: {
-              "index.mapping.total_fields.limit": 2000,
+              "index.mapping.total_fields.limit": 5000,
             }
           }
         });
@@ -45,58 +50,74 @@ class ShodanElasticSearch {
     return new Promise((resolve, reject) => {
       const hostArraySet = Object.values(data).map(entry => entry.hosts);
       const hostArraySetSuccessful = hostArraySet.filter(item => {
-        if (_.isEmpty(item)) {
-          console.log(item)
-        }
         return _.isEmpty(item) === false;
       });
       const hostData = _.flatten(hostArraySetSuccessful);
       const finalHostData = [];
       const promises = [];
-      let count = 0;
+      let success = 0;
+      let error = 0;
       similarWeb.initAgent().then(() => {
         hostData.map(host => {
-          let promise = Promise.resolve(null);
+          let promiseDomain = Promise.resolve('');
+          let promiseContact = Promise.resolve([]);
+          let promiseWhois = Promise.resolve({});
           const finalHost = KeyObject.deleteKeysFromObject(host, unusedProps);
           finalHost.groove = {};
           const domain = KeyObject.getPropertyByKeyPath(host, ['ssl', 'cert', 'subject', 'CN']);
           if (typeof domain === 'string') {
-            finalHost.groove.business_domain = domain.replace('*.', '');
+            finalHost.groove.business_domain = domain.replace('*.', '').replace('www.', '');
             finalHost.groove.business_domain_extract_by_cert = 1;
-            promise = similarWeb.getDomainInfo(finalHost.groove.business_domain).then(info => {
-              count += 1;
-              console.log('done', finalHost.groove.business_domain, ' - count', count);
+            promiseDomain = similarWeb.getDomainInfo(finalHost.groove.business_domain).then(info => {
+              success += 1;
+              console.log('done', finalHost.groove.business_domain, ' - count', success);
               finalHost.groove.similar_web = info;
               finalHost.groove.domain_info_extract_by_similar_web = 1;
             }).catch(err => {
-              
+              error += 1;
+              console.log('error', err.statusCode);
+            });
+            promiseContact = Contact.searchContactFromWebsite(finalHost.groove.business_domain).then(contact => {
+              console.log('done contact', contact);
+              finalHost.groove.contact = contact;
+            }).catch(err => {
+              console.log('error contact', err.message);
+            });
+            promiseWhois = Contact.getDomainRegisterInfoFromWhois(finalHost.groove.business_domain).then(contact => {
+              finalHost.groove.whois = contact;
+            }).catch(err => {
+              console.log('error contact', err.message);
             });
           } else {
             finalHost.groove.business_domain = null;
             finalHost.groove.business_domain_extract_by_cert = 0;
           }
           finalHostData.push(finalHost);
-          promises.push(promise);
+          promises.push(promiseDomain);
+          promises.push(promiseContact);
+          promises.push(promiseWhois);
         });
-        const domains = finalHostData.map(host => {
-          const domain = KeyObject.getPropertyByKeyPath(host, ['ssl', 'cert', 'subject', 'CN']);
-          if (typeof domain === 'string') {
-            return domain.replace('*.', '');
-          }
-          return domain;
-        });
-        fs.writeFile(
-          "./domains.json",
-          JSON.stringify(domains),
-          "utf8",
-          () => console.log("done domains.json")
-        );
+
+        // const domains = finalHostData.map(host => {
+        //   const domain = KeyObject.getPropertyByKeyPath(host, ['ssl', 'cert', 'subject', 'CN']);
+        //   if (typeof domain === 'string') {
+        //     return domain.replace('*.', '').replace('www.', '');
+        //   }
+        //   return domain;
+        // });
+        // fs.writeFile(
+        //   "./domains.json",
+        //   JSON.stringify(domains),
+        //   "utf8",
+        //   () => console.log("done domains.json")
+        // );
     
         console.log('before', hostArraySet.length, '- after', hostArraySetSuccessful.length);
         console.log('final data', finalHostData.length);
   
         Promise.all(promises).then(() => {
-          console.log('similar web:', count)
+          console.log('similar web:', success);
+          console.log('error', error);
           similarWeb.destroyAgent();
           resolve(finalHostData);
         });

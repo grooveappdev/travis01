@@ -166,7 +166,7 @@ const searchOpts = {
 // console.log("TEST TRAVIS");
 
 shodanES.client.indices.delete({
-  index: 'shodan_host'
+  index: 'van_test'
 }, function(err, res) {
 
   if (err) {

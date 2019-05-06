@@ -34,6 +34,13 @@ shodanES
   )
   .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES))
   .then(hostData => {
+    fs.writeFile(
+      "./host.json",
+      JSON.stringify(hostData.slice(0, 500).map(host => host.info)),
+      "utf8",
+      () => console.log("done host.json")
+    );
+
     const body = shodanES.buildShodanBulk(hostData, "van_test", "host");
     console.log('final body', body.length)
     shodanES.client
@@ -49,7 +56,7 @@ shodanES
         );
         fs.writeFile(
           "./test.json",
-          JSON.stringify(hostData.map(host => host.groove)),
+          JSON.stringify(hostData.map(host => host.groove.whois)),
           "utf8",
           () => console.log("done test.json")
         );
