@@ -65,6 +65,10 @@ const searchContactFromWebsite = (domain) => new Promise((resolve, reject) => {
             }
 
             const $2 = contactPageRes.$;
+            if (typeof ($2) !== 'function') {
+              return resolve(_.uniq(emails));
+            }
+            
             const contactPageBody = $2('body').html();
             if (contactPageBody) {
               emails.push(...findEmailsInHtmlBody(contactPageBody));
