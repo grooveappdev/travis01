@@ -30,7 +30,7 @@ shodanES
   .then(() =>
     shodanReq.getHosts("csrftoken country:GB port:443", {
       timeout: 120000
-    })
+    }, 3)
   )
   .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES))
   .then(hostData => {

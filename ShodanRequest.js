@@ -27,50 +27,76 @@ class ShodanRequest {
     return shodan.count(query, this.shodanToken, searchOpts).then(result => result.total || 0);
   }
 
-  getHosts(query, searchOpts = {}) {
-    return this.getHostCount(query, searchOpts).then(count => {
-      const shodanHostPageSet = {};
-      const pageCount = Math.ceil(count / 100);
-      const pageArray = this.createPageArray(pageCount);
-      const getHostPerPage = page => this.limiter.schedule(() => {
-        if (page) {
-          return shodan.search(query, this.shodanToken, {
-            ...searchOpts,
-            page
-          }).then(result => {
-            if (result.matches) {
-              shodanHostPageSet[page] = {
-                hosts: result.matches,
-                error: null,
-              };
-              return Promise.resolve('done');
-            } else {
-              console.log('error', page, 'No Data');
-              shodanHostPageSet[page] = {
-                hosts: null,
-                error: 'No Data'
-              };
-              return Promise.resolve('error');
-            }
-          }).catch(error => {
-            console.log('error', page, error);
-            shodanHostPageSet[page] = {
+  _getHostPerPage(query, searchOpts = {}, page) {
+    return this.limiter.schedule(() => {
+      if (page) {
+        return shodan.search(query, this.shodanToken, {
+          ...searchOpts,
+          page
+        }).then(result => {
+          if (result.matches) {
+            return Promise.resolve({
+              page,
+              hosts: result.matches,
+              error: null,
+            });
+          } else {
+            console.log('error', page, 'No Data');
+            return Promise.resolve({
+              page,
               hosts: null,
-              error
-            };
-            return Promise.resolve('error');
-          });
-        } else {
-          console.log('error', page, 'No Page');
-          shodanHostPageSet[page] = {
+              error: 'No Data'
+            });
+          }
+        }).catch(error => {
+          console.log('error', page, error);
+          return Promise.resolve({
+            page,
             hosts: null,
-            error: 'No Page'
-          };
-          return Promise.resolve('No Page');
+            error
+          });
+        });
+      } else {
+        console.log('error', page, 'No Page');
+        return Promise.resolve({
+          page,
+          hosts: null,
+          error: 'No Page'
+        });
+      }
+    });
+  }
+
+  _getHostWithRetry(query, searchOpts = {}, page, retry = 0, time = 0, errorPage) {
+    if (time > retry) {
+      return errorPage;
+    } else {
+      if (time > 0) {
+        console.log(`retry ${time} time on page ${page}`);
+      }
+      return this._getHostPerPage(query, searchOpts, page).then(hostPage => {
+        if (hostPage.error === null) {
+          return hostPage;
+        } else {
+          return this._getHostWithRetry(query, searchOpts, page, retry, time + 1, hostPage);
         }
       });
-      const getHostsRequests = pageArray.map(page => getHostPerPage(page));
-      return Promise.all(getHostsRequests).then(() => shodanHostPageSet);
+    }
+  }
+
+  getHosts(query, searchOpts = {}, retry = 0) {
+    const shodanHostPageSet = {};
+    return this.getHostCount(query, searchOpts).then(count => {
+      console.log('count', count)
+      const pageCount = Math.ceil(count / 100);
+      const pageArray = this.createPageArray(pageCount);
+      const getHostsRequests = pageArray.map(page => this._getHostWithRetry(query, searchOpts, page, retry));
+      return Promise.all(getHostsRequests).then(hostPageArr => {
+        hostPageArr.map(entry => {
+          shodanHostPageSet[entry.page] = entry;
+        });
+        return shodanHostPageSet;
+      });
     });
   }
 }

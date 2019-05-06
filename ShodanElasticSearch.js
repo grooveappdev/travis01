@@ -53,6 +53,7 @@ class ShodanElasticSearch {
         return _.isEmpty(item) === false;
       });
       const hostData = _.flatten(hostArraySetSuccessful);
+      console.log('host data', hostData.length)
       const finalHostData = [];
       const promises = [];
       let success = 0;
