@@ -37,7 +37,7 @@ class SimilarWeb {
           json: true,
           // resolveWithFullResponse: true,
           agent: this.agent,
-          timeout: 50000,
+          timeout: 45000,
           headers: {
             'Referer': 'chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp/panel/panel.html'
           },

@@ -32,9 +32,9 @@ const EDIT_PROPERTIES = [
 // const UNUSED_PROPERTIES = [
 //   "http", "ssl"
 // ];
-const keywords = ['csrftoken', 'country:GB', 'port:443'];
+const keywords = ['wsgi', 'country:GB', 'port:443'];
 shodanES
-  .createIndexIfNotExist("shodan_host")
+  .createIndexIfNotExist("van_test")
   .then(() =>
     shodanReq.getHosts(keywords.join(' '), {
       timeout: 120000
@@ -49,20 +49,23 @@ shodanES
     //   () => console.log("done host.json")
     // );
 
-    const body = shodanES.buildShodanBulk(hostData, "shodan_host", "host", keywords[0]);
+    const body = shodanES.buildShodanBulk(hostData, "van_test", "host", keywords[0]);
     console.log('final body', body.length)
     shodanES.client
       .bulk({
         body
       })
       .then(res => {
-        console.log('DONE')
-        // fs.writeFile(
-        //   "./data.json",
-        //   JSON.stringify(res.items.map(item => item.index.error || null)),
-        //   "utf8",
-        //   () => console.log("done data.json")
-        // );
+        console.log('DONE');
+        fs.writeFile(
+          "./data.json",
+          JSON.stringify(hostData),
+          "utf8",
+          () => {
+            console.log("done data.json");
+            process.exit(0);
+          }
+        );
         // fs.writeFile(
         //   "./test.json",
         //   JSON.stringify(hostData.map(host => host.groove.whois)),

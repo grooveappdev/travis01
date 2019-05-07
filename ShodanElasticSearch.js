@@ -5,11 +5,12 @@ const elasticsearch = require("elasticsearch");
 const KeyObject = require('./KeyObject');
 const SimilarWeb = require('./SimilarWeb');
 const Contact = require('./contact');
+const Wappalyzer = require('./wappalyzer');
 
 const similarWeb = new SimilarWeb({
   minTime: 100,
-  maxConcurrent: 18,
-  maxRetry: 3
+  maxConcurrent: 15,
+  maxRetry: 2
 });
 
 class ShodanElasticSearch {
@@ -58,6 +59,8 @@ class ShodanElasticSearch {
       const promiseDomainInfos = [];
       const promiseContacts = [];
       const promiseWhoiss = [];
+      const promiseWaps = [];
+      const domains = [];
       let count = 0;
       let success = 0;
       let error = 0;
@@ -93,11 +96,18 @@ class ShodanElasticSearch {
             const promiseWhois = Contact.getDomainRegisterInfoFromWhois(finalDomain).then(contact => {
               finalHost.groove.whois = contact;
             }).catch(err => {
-              console.log('error contact', err.message);
+              console.log('error whois', err.message);
+            });
+            const promiseWap = Wappalyzer.detectTechnologies(finalDomain).then(tech => {
+              finalHost.groove.wappalyzer = tech;
+            }).catch(err => {
+              console.log('error wappalyzer', err.message);
             });
             promiseDomainInfos.push(promiseDomainInfo);
             promiseContacts.push(promiseContact);
             promiseWhoiss.push(promiseWhois);
+            promiseWaps.push(promiseWap);
+            domains.push(finalDomain);
           } else {
             console.log('no domain')
             count += 1;
@@ -107,19 +117,12 @@ class ShodanElasticSearch {
           finalHostData.push(finalHost);
         });
 
-        // const domains = finalHostData.map(host => {
-        //   const domain = KeyObject.getPropertyByKeyPath(host, ['ssl', 'cert', 'subject', 'CN']);
-        //   if (typeof domain === 'string') {
-        //     return domain.replace('*.', '').replace('www.', '');
-        //   }
-        //   return domain;
-        // });
-        // fs.writeFile(
-        //   "./domains.json",
-        //   JSON.stringify(domains),
-        //   "utf8",
-        //   () => console.log("done domains.json")
-        // );
+        fs.writeFile(
+          "./domains.json",
+          JSON.stringify(domains),
+          "utf8",
+          () => console.log("done domains.json")
+        );
     
         console.log('before', hostArraySet.length, '- after', hostArraySetSuccessful.length);
         console.log('final data', finalHostData.length);
@@ -127,7 +130,8 @@ class ShodanElasticSearch {
         Promise.all([
           Promise.all(promiseDomainInfos).then(() => console.log('****** DONE DOMAIN INFO ******')),
           Promise.all(promiseContacts).then(() => console.log('****** DONE CONTACT ******')),
-          Promise.all(promiseWhoiss).then(() => console.log('****** DONE WHOIS ******'))
+          Promise.all(promiseWhoiss).then(() => console.log('****** DONE WHOIS ******')),
+          Promise.all(promiseWaps).then(() => console.log('****** DONE WAPS ******'))
         ]).then(() => {
           console.log('similar web:', success);
           console.log('error', error);

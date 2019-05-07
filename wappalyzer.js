@@ -1,5 +1,6 @@
 const Bottleneck = require('bottleneck');
 const Wappalyzer = require('wappalyzer');
+const fs = require("fs");
 
 const urlFormat = rawUrl => {
   if (/^https:\/\//.test(rawUrl) || /^http:\/\//.test(rawUrl)) {
@@ -14,7 +15,7 @@ const OPTIONS = {
   delay: 500,
   maxDepth: 3,
   maxUrls: 10,
-  maxWait: 5000,
+  maxWait: 10000,
   recursive: true,
   userAgent: 'Wappalyzer',
   htmlMaxCols: 2000,
@@ -22,23 +23,36 @@ const OPTIONS = {
 };
 
 const limiter = new Bottleneck({
-  maxConcurrent: 5
+  maxConcurrent: 10
 });
 
-const detectTechnologies = (url) => limiter.schedule(
-  () => new Promise((resolve, reject) => {
-    const wappalyzer = new Wappalyzer(urlFormat(url), OPTIONS);
-
-    return wappalyzer.analyze()
-      .then(json => {
-        return resolve(json);
-      })
-      .catch(error => {
-        return reject({});
-      });
+const detectTechnologies = url => limiter.schedule(() => {
+  const wappalyzer = new Wappalyzer(urlFormat(url), OPTIONS);
+  wappalyzer.browser = Wappalyzer.browsers.zombie;
+  return wappalyzer.analyze()
+  .then(json => {
+    const result = json && json.applications ? json.applications : [];
+    return result;
   })
-);
+  .catch(error => {
+    return [];
+  });
+});
 
 module.exports = {
   detectTechnologies
 }
+
+// const urls = require('./domains.json')
+
+// Promise.all(urls.map(url => detectTechnologies(url))).then(res => {
+//   fs.writeFile(
+//     "./data.json",
+//     JSON.stringify(res),
+//     "utf8",
+//     () => {
+//       console.log("done data.json");
+//       process.exit(0);
+//     }
+//   );
+// })

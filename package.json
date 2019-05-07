@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node ./test.js",
     "start": "node .",
-    "tor": "node tor.js"
+    "tor": "node tor.js",
+    "wap": "node wappalyzer.js"
   },
   "author": "",
   "license": "ISC",
