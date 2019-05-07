@@ -19,6 +19,7 @@
     "request-promise": "^4.2.4",
     "shodan-client": "^3.1.4",
     "toragent": "^0.1.1",
+    "wappalyzer": "^5.8.2",
     "whois-json": "^2.0.4"
   }
 }
