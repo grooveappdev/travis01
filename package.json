@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.450.0",
     "bottleneck": "^2.18.0",
     "crawler": "^1.2.1",
     "elasticsearch": "^15.4.1",
