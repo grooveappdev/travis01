@@ -8,7 +8,7 @@ class SimilarWeb {
   constructor(options) {
     this.minTime = options.minTime || 0;
     this.maxConcurrent = options.maxConcurrent || null;
-    this.maxRetry = options.maxRetry || 5;
+    this.maxRetry = options.maxRetry || 0;
 
     this.agent = null;
     this.limiter = new Bottleneck({
@@ -22,34 +22,35 @@ class SimilarWeb {
       return agent;
     });
   }
-  getDomainInfo(domain) {
-    let count = 0;
+  _getDomainInfo(domain, time = 0, error) {
     const maxRetry = this.maxRetry;
-    const similarWebReq = () => {
+    if (time > maxRetry || (error && !error.statusCode) || (error && error.statusCode < 500)) {
+      return Promise.reject(error);
+    } else {
+      if (time > 0) {
+        console.log(`retry ${time} time on domain ${domain}`);
+      }
       return this.agent.rotateAddress().then(() => {
-        // console.log('rotate agent')
         return request({
           uri: `https://api.similarweb.com/SimilarWebAddon/${domain}/all`,
           // uri: 'http://ip-api.com/json',
           json: true,
           // resolveWithFullResponse: true,
           agent: this.agent,
-          timeout: 60000,
+          timeout: 50000,
           headers: {
             'Referer': 'chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp/panel/panel.html'
           },
         }).catch(err => {
-          count += 1;
-          if (count < maxRetry && err.statusCode >= 500) {
-            return similarWebReq();
-          } else {
-            return Promise.reject(err);
-          }
+          return this._getDomainInfo(domain, time + 1, err);
         });
       });
     }
+  }
+  getDomainInfo(domain) {
+    // return this._getDomainInfo(domain, 0);
     return this.limiter.schedule(() => {
-      return similarWebReq();
+      return this._getDomainInfo(domain, 0);
     });
   }
   destroyAgent() {

@@ -22,44 +22,77 @@ const UNUSED_PROPERTIES = [
   "ssl.chain",
   "ssl.dhparams.generator"
 ];
+const EDIT_PROPERTIES = [
+  'groove.similar_web.CategoryRank.Rank',
+  'groove.similar_web.CountryRank.Rank',
+  'groove.similar_web.GlobalRank.Rank',
+  'groove.similar_web.SimilarSites.Rank',
+  'groove.similar_web.SimilarSitesByRank.Rank'
+];
 // const UNUSED_PROPERTIES = [
 //   "http", "ssl"
 // ];
+const keywords = ['csrftoken', 'country:GB', 'port:443'];
 shodanES
-  .createIndexIfNotExist("van_test")
+  .createIndexIfNotExist("shodan_host")
   .then(() =>
-    shodanReq.getHosts("csrftoken country:GB port:443", {
+    shodanReq.getHosts(keywords.join(' '), {
       timeout: 120000
     }, 3)
   )
-  .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES))
+  .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
   .then(hostData => {
-    fs.writeFile(
-      "./host.json",
-      JSON.stringify(hostData.slice(0, 500).map(host => host.info)),
-      "utf8",
-      () => console.log("done host.json")
-    );
+    // fs.writeFile(
+    //   "./host.json",
+    //   JSON.stringify(hostData.slice(0, 500).map(host => host.info)),
+    //   "utf8",
+    //   () => console.log("done host.json")
+    // );
 
-    const body = shodanES.buildShodanBulk(hostData, "van_test", "host");
+    const body = shodanES.buildShodanBulk(hostData, "shodan_host", "host", keywords[0]);
     console.log('final body', body.length)
     shodanES.client
       .bulk({
         body
       })
       .then(res => {
-        fs.writeFile(
-          "./data.json",
-          JSON.stringify(res.items.map(item => item.index.error || null)),
-          "utf8",
-          () => console.log("done data.json")
-        );
-        fs.writeFile(
-          "./test.json",
-          JSON.stringify(hostData.map(host => host.groove.whois)),
-          "utf8",
-          () => console.log("done test.json")
-        );
+        console.log('DONE')
+        // fs.writeFile(
+        //   "./data.json",
+        //   JSON.stringify(res.items.map(item => item.index.error || null)),
+        //   "utf8",
+        //   () => console.log("done data.json")
+        // );
+        // fs.writeFile(
+        //   "./test.json",
+        //   JSON.stringify(hostData.map(host => host.groove.whois)),
+        //   "utf8",
+        //   () => console.log("done test.json")
+        // );
       })
       .catch(err => console.log("error", err));
   });
+
+// shodanES
+//   .createIndexIfNotExist("shodan_host")
+//   .then(() => {
+//     return shodanES.client
+//     .reindex({
+//       body: {
+//         source: {
+//           index: "van_test",
+//           query: {
+//             "match_all": {}
+//           }
+//         },
+//         dest: {
+//           index: "shodan_host"
+//         },
+//       },
+//     })
+//     .then(res => {
+//       console.log('res', res)
+//     })
+//     .catch(err => console.log("error", err));
+//   });
+

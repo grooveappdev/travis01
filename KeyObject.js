@@ -1,17 +1,39 @@
 const DOT_SEPARATOR = ".";
 const _ = require("lodash");
 
-const getPropertyByKeyPath = (obj, paths) => {
+const editPropertyByKeyPath = (obj, paths, value, condition) => {
+  const pathArr = paths.split(DOT_SEPARATOR);
   let virtual = obj;
-  const lastAttributeIndex = paths.length - 1;
+  const lastAttributeIndex = pathArr.length - 1;
   for (let i = 0; i < lastAttributeIndex; i += 1) {
-    const path = paths[i];
+    const path = pathArr[i];
+    virtual = virtual[path];
+    if (typeof virtual !== "object" || virtual === null) {
+      return false;
+    }
+  }
+  if (
+    (typeof condition === "function" && condition(virtual[pathArr[lastAttributeIndex]]) === true) ||
+    condition === undefined
+  ) {
+    virtual[pathArr[lastAttributeIndex]] = value;
+    return true;
+  }
+  return false;
+};
+
+const getPropertyByKeyPath = (obj, paths) => {
+  const pathArr = paths.split(DOT_SEPARATOR);
+  let virtual = obj;
+  const lastAttributeIndex = pathArr.length - 1;
+  for (let i = 0; i < lastAttributeIndex; i += 1) {
+    const path = pathArr[i];
     virtual = virtual[path];
     if (typeof virtual !== "object" || virtual === null) {
       return undefined;
     }
   }
-  return virtual[paths[lastAttributeIndex]];
+  return virtual[pathArr[lastAttributeIndex]];
 };
 
 const deletePropertyByKeyPath = (obj, paths) => {
@@ -73,5 +95,6 @@ const deleteKeysFromObject = function(object, keys, options) {
 module.exports = {
   getPropertyByKeyPath,
   deletePropertyByKeyPath,
-  deleteKeysFromObject
+  deleteKeysFromObject,
+  editPropertyByKeyPath
 };

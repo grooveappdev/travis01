@@ -23,7 +23,7 @@ const client = new elasticsearch.Client({
 
 // client.count(
 //   {
-//     index: "shodan_host",
+//     index: "van_test",
 //     type: "host",
 //     body: {
 //       query: { 'match_all': {} }
@@ -42,7 +42,7 @@ const client = new elasticsearch.Client({
 // });
 
 client.indices.delete({
-  index: 'van_test'
+  index: 'shodan_host'
 }, function(err, res) {
 
   if (err) {

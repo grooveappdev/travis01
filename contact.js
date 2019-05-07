@@ -89,7 +89,7 @@ const limiter = new Bottleneck({
 
 const getDomainRegisterInfoFromWhois = (domain) => limiter.schedule(
   () => new Promise((resolve, reject) => {
-    return whois(domain).then((result) => {
+    return whois(domain, { timeout: 8000 }).then((result) => {
       return resolve(result);
     }).catch((error) => {
       return resolve({});

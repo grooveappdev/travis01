@@ -8,8 +8,8 @@ const Contact = require('./contact');
 
 const similarWeb = new SimilarWeb({
   minTime: 100,
-  maxConcurrent: 20,
-  maxRetry: 5
+  maxConcurrent: 18,
+  maxRetry: 3
 });
 
 class ShodanElasticSearch {
@@ -46,7 +46,7 @@ class ShodanElasticSearch {
     });
   }
 
-  parseShodanHostData(data, unusedProps) {
+  parseShodanHostData(data, unusedProps, editProps) {
     return new Promise((resolve, reject) => {
       const hostArraySet = Object.values(data).map(entry => entry.hosts);
       const hostArraySetSuccessful = hostArraySet.filter(item => {
@@ -55,48 +55,56 @@ class ShodanElasticSearch {
       const hostData = _.flatten(hostArraySetSuccessful);
       console.log('host data', hostData.length)
       const finalHostData = [];
-      const promises = [];
+      const promiseDomainInfos = [];
+      const promiseContacts = [];
+      const promiseWhoiss = [];
+      let count = 0;
       let success = 0;
       let error = 0;
       similarWeb.initAgent().then(() => {
         hostData.map(host => {
-          let promiseDomain = Promise.resolve('');
-          let promiseContact = Promise.resolve([]);
-          let promiseWhois = Promise.resolve({});
           const finalHost = KeyObject.deleteKeysFromObject(host, unusedProps);
           finalHost.groove = {};
-          const domain = KeyObject.getPropertyByKeyPath(host, ['ssl', 'cert', 'subject', 'CN']);
+          const domain = KeyObject.getPropertyByKeyPath(host, 'ssl.cert.subject.CN');
           if (typeof domain === 'string') {
-            finalHost.groove.business_domain = domain.replace('*.', '').replace('www.', '');
+            const finalDomain = domain.replace('*.', '').replace('www.', '');
+            finalHost.groove.business_domain = finalDomain;
             finalHost.groove.business_domain_extract_by_cert = 1;
-            promiseDomain = similarWeb.getDomainInfo(finalHost.groove.business_domain).then(info => {
+            const promiseDomainInfo = similarWeb.getDomainInfo(finalDomain).then(info => {
               success += 1;
-              console.log('done', finalHost.groove.business_domain, ' - count', success);
+              count += 1;
+              console.log('done', finalDomain, ' - count', count);
               finalHost.groove.similar_web = info;
               finalHost.groove.domain_info_extract_by_similar_web = 1;
+              editProps.forEach(props => {
+                KeyObject.editPropertyByKeyPath(finalHost, props, 999999999, oldValue => !oldValue);
+              });
             }).catch(err => {
               error += 1;
-              console.log('error', err.statusCode);
+              count += 1;
+              console.log('error', err.statusCode, ' - count', count);
             });
-            promiseContact = Contact.searchContactFromWebsite(finalHost.groove.business_domain).then(contact => {
+            const promiseContact = Contact.searchContactFromWebsite(finalDomain).then(contact => {
               console.log('done contact', contact);
               finalHost.groove.contact = contact;
             }).catch(err => {
               console.log('error contact', err.message);
             });
-            promiseWhois = Contact.getDomainRegisterInfoFromWhois(finalHost.groove.business_domain).then(contact => {
+            const promiseWhois = Contact.getDomainRegisterInfoFromWhois(finalDomain).then(contact => {
               finalHost.groove.whois = contact;
             }).catch(err => {
               console.log('error contact', err.message);
             });
+            promiseDomainInfos.push(promiseDomainInfo);
+            promiseContacts.push(promiseContact);
+            promiseWhoiss.push(promiseWhois);
           } else {
+            console.log('no domain')
+            count += 1;
             finalHost.groove.business_domain = null;
             finalHost.groove.business_domain_extract_by_cert = 0;
           }
           finalHostData.push(finalHost);
-          promises.push(promiseDomain);
-          promises.push(promiseContact);
-          promises.push(promiseWhois);
         });
 
         // const domains = finalHostData.map(host => {
@@ -116,7 +124,11 @@ class ShodanElasticSearch {
         console.log('before', hostArraySet.length, '- after', hostArraySetSuccessful.length);
         console.log('final data', finalHostData.length);
   
-        Promise.all(promises).then(() => {
+        Promise.all([
+          Promise.all(promiseDomainInfos).then(() => console.log('****** DONE DOMAIN INFO ******')),
+          Promise.all(promiseContacts).then(() => console.log('****** DONE CONTACT ******')),
+          Promise.all(promiseWhoiss).then(() => console.log('****** DONE WHOIS ******'))
+        ]).then(() => {
           console.log('similar web:', success);
           console.log('error', error);
           similarWeb.destroyAgent();
@@ -126,30 +138,30 @@ class ShodanElasticSearch {
     });
   }
   
-  buildShodanBulk(hostData, indexName, type) {
+  buildShodanBulk(hostData, indexName, type, keyword) {
     const bulk = [];
     const test = [];
-    const ip = [];
+    // const ip = [];
     hostData.map(match => {
       if (match && match.ip_str) {
         bulk.push({
           index: {
             _index: indexName,
             _type: type,
-            _id: `shodan_${match.ip_str}_${match.port}`
+            _id: `shodan_${keyword}_${match.ip_str}_${match.port}`
           }
         });
         bulk.push(match);
-        test.push(`shodan_${match.ip_str}_${match.port}`);
-        ip.push(match.ip_str)
+        test.push(`shodan_${keyword}_${match.ip_str}_${match.port}`);
+        // ip.push(match.ip_str)
       };
     });
-    fs.writeFile(
-      "./ip.json",
-      JSON.stringify(ip),
-      "utf8",
-      () => console.log("done ip.json")
-    );
+    // fs.writeFile(
+    //   "./ip.json",
+    //   JSON.stringify(ip),
+    //   "utf8",
+    //   () => console.log("done ip.json")
+    // );
     console.log('unique', _.uniq(test).length);
     return bulk;
   };

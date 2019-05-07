@@ -28,43 +28,41 @@ class ShodanRequest {
   }
 
   _getHostPerPage(query, searchOpts = {}, page) {
-    return this.limiter.schedule(() => {
-      if (page) {
-        return shodan.search(query, this.shodanToken, {
-          ...searchOpts,
-          page
-        }).then(result => {
-          if (result.matches) {
-            return Promise.resolve({
-              page,
-              hosts: result.matches,
-              error: null,
-            });
-          } else {
-            console.log('error', page, 'No Data');
-            return Promise.resolve({
-              page,
-              hosts: null,
-              error: 'No Data'
-            });
-          }
-        }).catch(error => {
-          console.log('error', page, error);
+    if (page) {
+      return shodan.search(query, this.shodanToken, {
+        ...searchOpts,
+        page
+      }).then(result => {
+        if (result.matches) {
+          return Promise.resolve({
+            page,
+            hosts: result.matches,
+            error: null,
+          });
+        } else {
+          console.log('error', page, 'No Data');
           return Promise.resolve({
             page,
             hosts: null,
-            error
+            error: 'No Data'
           });
-        });
-      } else {
-        console.log('error', page, 'No Page');
+        }
+      }).catch(error => {
+        console.log('error', page, error);
         return Promise.resolve({
           page,
           hosts: null,
-          error: 'No Page'
+          error
         });
-      }
-    });
+      });
+    } else {
+      console.log('error', page, 'No Page');
+      return Promise.resolve({
+        page,
+        hosts: null,
+        error: 'No Page'
+      });
+    }
   }
 
   _getHostWithRetry(query, searchOpts = {}, page, retry = 0, time = 0, errorPage) {
@@ -90,7 +88,9 @@ class ShodanRequest {
       console.log('count', count)
       const pageCount = Math.ceil(count / 100);
       const pageArray = this.createPageArray(pageCount);
-      const getHostsRequests = pageArray.map(page => this._getHostWithRetry(query, searchOpts, page, retry));
+      const getHostsRequests = pageArray.map(page => this.limiter.schedule(() => {
+        return this._getHostWithRetry(query, searchOpts, page, retry);
+      }));
       return Promise.all(getHostsRequests).then(hostPageArr => {
         hostPageArr.map(entry => {
           shodanHostPageSet[entry.page] = entry;
