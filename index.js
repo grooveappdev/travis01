@@ -32,7 +32,7 @@ const EDIT_PROPERTIES = [
 // const UNUSED_PROPERTIES = [
 //   "http", "ssl"
 // ];
-const keywords = ['wsgi', 'country:GB', 'port:443'];
+const keywords = ['django', 'country:GB', 'port:443'];
 shodanES
   .createIndexIfNotExist("van_test")
   .then(() =>

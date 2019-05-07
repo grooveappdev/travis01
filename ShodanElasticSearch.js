@@ -103,6 +103,17 @@ class ShodanElasticSearch {
             }).catch(err => {
               console.log('error wappalyzer', err.message);
             });
+            const vulnsObj = KeyObject.vulnsChecker(finalHost);
+            if (vulnsObj) {
+              finalHost.groove.vulns = {
+                all: vulnsObj.vulnsList,
+                verified: vulnsObj.vulnsVerified
+              };
+            }
+            const httpComponents = KeyObject.httpComponentsChecker(finalHost);
+            if (httpComponents) {
+              finalHost.groove.httpComponents = httpComponents;
+            }
             promiseDomainInfos.push(promiseDomainInfo);
             promiseContacts.push(promiseContact);
             promiseWhoiss.push(promiseWhois);

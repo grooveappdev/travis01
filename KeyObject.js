@@ -1,6 +1,37 @@
 const DOT_SEPARATOR = ".";
 const _ = require("lodash");
 
+const vulnsKeyword = 'vulns';
+const vulnsChecker = obj => {
+  const vulns = obj[vulnsKeyword];
+  const vulnsList = [];
+  const vulnsVerified = [];
+  if (vulns !== null && typeof vulns === 'object') {
+    Object.keys(vulns).map(key => {
+      vulnsList.push(key);
+      if (vulns[key] && vulns[key].verified) {
+        vulnsVerified.push(key);
+      }
+    });
+    delete obj[vulnsKeyword];
+    return {
+      vulnsList,
+      vulnsVerified
+    }
+  }
+  return false;
+}
+
+const componentsKeyword = 'http.components';
+const httpComponentsChecker = obj => {
+  const components = getPropertyByKeyPath(obj, componentsKeyword);
+  if (components !== null && typeof components === 'object') {
+    deletePropertyByKeyPath(obj, componentsKeyword);
+    return Object.keys(components);
+  }
+  return false;
+}
+
 const editPropertyByKeyPath = (obj, paths, value, condition) => {
   const pathArr = paths.split(DOT_SEPARATOR);
   let virtual = obj;
@@ -37,16 +68,17 @@ const getPropertyByKeyPath = (obj, paths) => {
 };
 
 const deletePropertyByKeyPath = (obj, paths) => {
+  const pathArr = paths.split(DOT_SEPARATOR);
   let virtual = obj;
-  const lastAttributeIndex = paths.length - 1;
+  const lastAttributeIndex = pathArr.length - 1;
   for (let i = 0; i < lastAttributeIndex; i += 1) {
-    const path = paths[i];
+    const path = pathArr[i];
     virtual = virtual[path];
     if (typeof virtual !== "object" || virtual === null) {
       return false;
     }
   }
-  delete virtual[paths[lastAttributeIndex]];
+  delete virtual[pathArr[lastAttributeIndex]];
   return true;
 };
 
@@ -80,12 +112,11 @@ const deleteKeysFromObject = function(object, keys, options) {
   } else {
     keysToDelete = [keys];
   }
-  keysToDelete.forEach(function(elem) {
-    if (elem.indexOf(DOT_SEPARATOR) != -1) {
-      const paths = elem.split(DOT_SEPARATOR);
+  keysToDelete.forEach(function(paths) {
+    if (paths.indexOf(DOT_SEPARATOR) != -1) {
       deletePropertyByKeyPath(finalObject, paths);
-    } else if (typeof elem === "string") {
-      delete finalObject[elem];
+    } else if (typeof paths === "string") {
+      delete finalObject[paths];
     }
   });
 
@@ -96,5 +127,7 @@ module.exports = {
   getPropertyByKeyPath,
   deletePropertyByKeyPath,
   deleteKeysFromObject,
-  editPropertyByKeyPath
+  editPropertyByKeyPath,
+  vulnsChecker,
+  httpComponentsChecker
 };
