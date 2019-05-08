@@ -1,78 +1,78 @@
-// require('dotenv').config()
-// const fs = require("fs");
-// const _ = require("lodash");
-// const ShodanRequest = require("./ShodanRequest");
-// const ShodanElasticSearch = require("./ShodanElasticSearch");
-// const Queue = require('./awsSqsReceiver');
+require('dotenv').config()
+const fs = require("fs");
+const _ = require("lodash");
+const ShodanRequest = require("./ShodanRequest");
+const ShodanElasticSearch = require("./ShodanElasticSearch");
+const Queue = require('./awsSqsReceiver');
 
-// const shodanReq = new ShodanRequest({
-//   shodanToken: process.env.SHODAN_TOKEN,
-//   minTime: 2000,
-//   maxConcurrent: 8
-// });
+const shodanReq = new ShodanRequest({
+  shodanToken: process.env.SHODAN_TOKEN,
+  minTime: 2000,
+  maxConcurrent: 8
+});
 
-// const shodanES = new ShodanElasticSearch({
-//   host:
-//     "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
-//   requestTimeout: 180000
-// });
+const shodanES = new ShodanElasticSearch({
+  host:
+    "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
+  requestTimeout: 180000
+});
 
-// const UNUSED_PROPERTIES = [
-//   "http.html",
-//   "http.favicon",
-//   "ssl.cert.serial",
-//   "ssl.chain",
-//   "ssl.dhparams.generator"
-// ];
-// const EDIT_PROPERTIES = [
-//   'groove.similar_web.CategoryRank.Rank',
-//   'groove.similar_web.CountryRank.Rank',
-//   'groove.similar_web.GlobalRank.Rank',
-//   'groove.similar_web.SimilarSites.Rank',
-//   'groove.similar_web.SimilarSitesByRank.Rank'
-// ];
-// Queue.receiveMessage().then(message => {
-//   console.log('receive', message.Body)
-//   const keywords = [message.Body, 'country:GB', 'port:443'];
-//   shodanES
-//     .createIndexIfNotExist("van_test")
-//     .then(() =>
-//       shodanReq.getHosts(keywords.join(' '), {
-//         timeout: 120000
-//       }, 3)
-//     )
-//     .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
-//     .then(hostData => {  
-//       const body = shodanES.buildShodanBulk(hostData, "van_test", "host", keywords[0]);
-//       console.log('final body', body.length)
-//       shodanES.client
-//         .bulk({
-//           body
-//         })
-//         .then(res => {
-//           console.log('DONE');
-//           message.ack().then(data => {
-//             console.log('ack', data)
-//             process.exit(0);
-//           });
-//           // fs.writeFile(
-//           //   "./data.json",
-//           //   JSON.stringify(hostData),
-//           //   "utf8",
-//           //   () => {
-//           //     console.log("done data.json");
-//           //     message.ack().then(data => {
-//           //       console.log('ack', data)
-//           //       process.exit(0);
-//           //     });
-//           //   }
-//           // );
-//         })
-//         .catch(err => console.log("error", err));
-//     });
-// });
+const UNUSED_PROPERTIES = [
+  "http.html",
+  "http.favicon",
+  "ssl.cert.serial",
+  "ssl.chain",
+  "ssl.dhparams.generator"
+];
+const EDIT_PROPERTIES = [
+  'groove.similar_web.CategoryRank.Rank',
+  'groove.similar_web.CountryRank.Rank',
+  'groove.similar_web.GlobalRank.Rank',
+  'groove.similar_web.SimilarSites.Rank',
+  'groove.similar_web.SimilarSitesByRank.Rank'
+];
+Queue.receiveMessage().then(message => {
+  console.log('receive', message.Body)
+  const keywords = [message.Body, 'country:GB', 'port:443'];
+  shodanES
+    .createIndexIfNotExist("shodan_host")
+    .then(() =>
+      shodanReq.getHosts(keywords.join(' '), {
+        timeout: 120000
+      }, 3)
+    )
+    .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
+    .then(hostData => {  
+      const body = shodanES.buildShodanBulk(hostData, "shodan_host", "host", keywords[0]);
+      console.log('final body', body.length)
+      shodanES.client
+        .bulk({
+          body
+        })
+        .then(res => {
+          console.log('DONE');
+          message.ack().then(data => {
+            console.log('ack', data)
+            process.exit(0);
+          });
+          // fs.writeFile(
+          //   "./data.json",
+          //   JSON.stringify(hostData),
+          //   "utf8",
+          //   () => {
+          //     console.log("done data.json");
+          //     message.ack().then(data => {
+          //       console.log('ack', data)
+          //       process.exit(0);
+          //     });
+          //   }
+          // );
+        })
+        .catch(err => console.log("error", err));
+    });
+});
 
-console.log(process.env.SHODAN_TOKEN)
+// console.log(process.env.SHODAN_TOKEN)
 
 
 // shodanES

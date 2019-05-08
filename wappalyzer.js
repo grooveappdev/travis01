@@ -13,13 +13,13 @@ const urlFormat = rawUrl => {
 const OPTIONS = {
   debug: false,
   delay: 500,
-  maxDepth: 3,
-  maxUrls: 10,
-  maxWait: 4000,
-  recursive: true,
-  userAgent: 'Wappalyzer',
+  maxDepth: 2,
+  maxUrls: 1,
   htmlMaxCols: 2000,
   htmlMaxRows: 2000,
+  maxWait: 10000,
+  recursive: true,
+  userAgent: 'Wappalyzer'
 };
 
 const limiter = new Bottleneck({
@@ -27,9 +27,7 @@ const limiter = new Bottleneck({
 });
 
 const detectTechnologies = url => limiter.schedule(() => {
-  const wappalyzer = new Wappalyzer(urlFormat(url), OPTIONS);
-  wappalyzer.browser = Wappalyzer.browsers.zombie;
-  return wappalyzer.analyze()
+  return new Wappalyzer(urlFormat(url), OPTIONS).analyze()
   .then(json => {
     const result = json && json.applications ? json.applications : [];
     return result;

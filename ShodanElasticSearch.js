@@ -8,7 +8,6 @@ const Contact = require('./contact');
 const Wappalyzer = require('./wappalyzer');
 
 const similarWeb = new SimilarWeb({
-  minTime: 100,
   maxConcurrent: 15,
   maxRetry: 2
 });
@@ -98,32 +97,32 @@ class ShodanElasticSearch {
             }).catch(err => {
               console.log('error whois', err.message);
             });
-            const promiseWap = Wappalyzer.detectTechnologies(finalDomain).then(tech => {
-              finalHost.groove.wappalyzer = tech;
-            }).catch(err => {
-              console.log('error wappalyzer', err.message);
-            });
-            const vulnsObj = KeyObject.vulnsChecker(finalHost);
-            if (vulnsObj) {
-              finalHost.groove.vulns = {
-                all: vulnsObj.vulnsList,
-                verified: vulnsObj.vulnsVerified
-              };
-            }
-            const httpComponents = KeyObject.httpComponentsChecker(finalHost);
-            if (httpComponents) {
-              finalHost.groove.httpComponents = httpComponents;
-            }
+            // const promiseWap = Wappalyzer.detectTechnologies(finalDomain).then(tech => {
+            //   finalHost.groove.wappalyzer = tech;
+            // }).catch(err => {
+            //   console.log('error wappalyzer', err.message);
+            // });
             promiseDomainInfos.push(promiseDomainInfo);
             promiseContacts.push(promiseContact);
             promiseWhoiss.push(promiseWhois);
-            promiseWaps.push(promiseWap);
+            // promiseWaps.push(promiseWap);
             domains.push(finalDomain);
           } else {
             console.log('no domain')
             count += 1;
             finalHost.groove.business_domain = null;
             finalHost.groove.business_domain_extract_by_cert = 0;
+          }
+          const vulnsObj = KeyObject.vulnsChecker(finalHost);
+          if (vulnsObj) {
+            finalHost.groove.vulns = {
+              all: vulnsObj.vulnsList,
+              verified: vulnsObj.vulnsVerified
+            };
+          }
+          const httpComponents = KeyObject.httpComponentsChecker(finalHost);
+          if (httpComponents) {
+            finalHost.groove.httpComponents = httpComponents;
           }
           finalHostData.push(finalHost);
         });
@@ -142,7 +141,7 @@ class ShodanElasticSearch {
           Promise.all(promiseDomainInfos).then(() => console.log('****** DONE DOMAIN INFO ******')),
           Promise.all(promiseContacts).then(() => console.log('****** DONE CONTACT ******')),
           Promise.all(promiseWhoiss).then(() => console.log('****** DONE WHOIS ******')),
-          Promise.all(promiseWaps).then(() => console.log('****** DONE WAPS ******'))
+          // Promise.all(promiseWaps).then(() => console.log('****** DONE WAPS ******'))
         ]).then(() => {
           console.log('similar web:', success);
           console.log('error', error);
