@@ -76,7 +76,6 @@ const keywords = ['wsgi', 'country:GB', 'port:443'];
 
 // console.log(process.env.SHODAN_TOKEN)
 
-
 // shodanES
 //   .createIndexIfNotExist("shodan_host")
 //   .then(() => {
