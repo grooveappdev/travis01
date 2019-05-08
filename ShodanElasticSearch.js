@@ -5,7 +5,7 @@ const elasticsearch = require("elasticsearch");
 const KeyObject = require('./KeyObject');
 const SimilarWeb = require('./SimilarWeb');
 const Contact = require('./contact');
-const Wappalyzer = require('./wappalyzer');
+// const Wappalyzer = require('./wappalyzer');
 
 const similarWeb = new SimilarWeb({
   maxConcurrent: 15,
