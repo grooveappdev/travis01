@@ -128,12 +128,12 @@ class ShodanElasticSearch {
           finalHostData.push(finalHost);
         });
 
-        fs.writeFile(
-          "./domains.json",
-          JSON.stringify(domains),
-          "utf8",
-          () => console.log("done domains.json")
-        );
+        // fs.writeFile(
+        //   "./domains.json",
+        //   JSON.stringify(domains),
+        //   "utf8",
+        //   () => console.log("done domains.json")
+        // );
     
         console.log('before', hostArraySet.length, '- after', hostArraySetSuccessful.length);
         console.log('final data', finalHostData.length);

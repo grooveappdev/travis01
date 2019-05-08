@@ -60,18 +60,18 @@ Queue.receiveMessage().then(message => {
         })
         .then(res => {
           console.log('DONE');
-          fs.writeFile(
-            "./data.json",
-            JSON.stringify(hostData),
-            "utf8",
-            () => {
-              console.log("done data.json");
-              message.ack().then(data => {
-                console.log('ack', data)
-                process.exit(0);
-              });
-            }
-          );
+          // fs.writeFile(
+          //   "./data.json",
+          //   JSON.stringify(hostData),
+          //   "utf8",
+          //   () => {
+          //     console.log("done data.json");
+          //     message.ack().then(data => {
+          //       console.log('ack', data)
+          //       process.exit(0);
+          //     });
+          //   }
+          // );
           // fs.writeFile(
           //   "./test.json",
           //   JSON.stringify(hostData.map(host => host.groove.whois)),
