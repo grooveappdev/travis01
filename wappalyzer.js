@@ -15,7 +15,7 @@ const OPTIONS = {
   delay: 500,
   maxDepth: 3,
   maxUrls: 10,
-  maxWait: 10000,
+  maxWait: 4000,
   recursive: true,
   userAgent: 'Wappalyzer',
   htmlMaxCols: 2000,
@@ -23,7 +23,7 @@ const OPTIONS = {
 };
 
 const limiter = new Bottleneck({
-  maxConcurrent: 10
+  maxConcurrent: 15
 });
 
 const detectTechnologies = url => limiter.schedule(() => {
@@ -52,7 +52,7 @@ module.exports = {
 //     "utf8",
 //     () => {
 //       console.log("done data.json");
-//       process.exit(0);
+//       // process.exit(0);
 //     }
 //   );
-// })
+// });

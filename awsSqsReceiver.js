@@ -17,7 +17,7 @@ const receiveMessage = () => new Promise((resolve, reject) => {
       "All"
     ],
     QueueUrl: queueURL,
-    VisibilityTimeout: 20,
+    VisibilityTimeout: 120,
     WaitTimeSeconds: 20
   };
 
@@ -25,13 +25,34 @@ const receiveMessage = () => new Promise((resolve, reject) => {
     if (err) {
       console.log("Receive Error", err);
       return reject(err);
-    } else if (data) {
-      console.log('Received message:', data);
-      return resolve(data);
     }
+    console.log('***************************************')
+    if (data && data.Messages && data.Messages[0]) {
+      const message = data.Messages[0];
+      message.ack = () => new Promise((ackRes, ackRej) => {
+        const deleteParams = {
+          QueueUrl: queueURL,
+          ReceiptHandle: message.ReceiptHandle
+        };
+        sqs.deleteMessage(deleteParams, function(err, data) {
+          if (err) {
+            ackRej(err);
+          } else {
+            ackRes(data);
+          }
+        });
+      });
+      return resolve(message);
+    }
+    return reject(new Error('Queue Empty'))
   });
 });
 
 module.exports = {
   receiveMessage
 };
+
+// receiveMessage().then(data => {
+//   console.log(data);
+//   data.ack();
+// }).catch(err => console.log(err.message))
