@@ -1,8 +1,0 @@
-{
-  "queueUrl": "https://sqs.ap-southeast-1.amazonaws.com/784184982766/van-test",
-  "auth": {
-    "accessKeyId": "AKIAIGIFRAVNZ6JMTMBQ",
-    "secretAccessKey": "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",
-    "region": "ap-southeast-1"
-  }
-}

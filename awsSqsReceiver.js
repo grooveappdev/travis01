@@ -1,11 +1,14 @@
 const AWS = require('aws-sdk');
-const awsconfig = require('./awsconfig.json')
 
-AWS.config.update(awsconfig.auth);
+AWS.config.update({
+  "accessKeyId": process.env.AWS_ACCESS_KEY,
+  "secretAccessKey": process.env.AWS_SECRET_KEY,
+  "region": "ap-southeast-1"
+});
 
 var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
-const queueURL = awsconfig.queueUrl;
+const queueURL = 'https://sqs.ap-southeast-1.amazonaws.com/784184982766/van-test';
 
 const receiveMessage = () => new Promise((resolve, reject) => {
   const params = {
