@@ -3,7 +3,7 @@ const fs = require("fs");
 const _ = require("lodash");
 const ShodanRequest = require("./ShodanRequest");
 const ShodanElasticSearch = require("./ShodanElasticSearch");
-const Queue = require('./awsSqsReceiver');
+// const Queue = require('./awsSqsReceiver');
 
 const shodanReq = new ShodanRequest({
   shodanToken: process.env.SHODAN_TOKEN,
@@ -31,11 +31,10 @@ const EDIT_PROPERTIES = [
   'groove.similar_web.SimilarSites.Rank',
   'groove.similar_web.SimilarSitesByRank.Rank'
 ];
-Queue.receiveMessage().then(message => {
-  console.log('receive', message.Body)
-  const keywords = [message.Body, 'country:GB', 'port:443'];
+
+const keywords = ['wsgi', 'country:GB', 'port:443'];
   shodanES
-    .createIndexIfNotExist("shodan_host")
+    .createIndexIfNotExist("van_test")
     .then(() =>
       shodanReq.getHosts(keywords.join(' '), {
         timeout: 120000
@@ -43,7 +42,7 @@ Queue.receiveMessage().then(message => {
     )
     .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
     .then(hostData => {  
-      const body = shodanES.buildShodanBulk(hostData, "shodan_host", "host", keywords[0]);
+      const body = shodanES.buildShodanBulk(hostData, "van_test", "host", keywords[0]);
       console.log('final body', body.length)
       shodanES.client
         .bulk({
@@ -70,7 +69,10 @@ Queue.receiveMessage().then(message => {
         })
         .catch(err => console.log("error", err));
     });
-});
+// Queue.receiveMessage().then(message => {
+//   console.log('receive', message.Body)
+  
+// });
 
 // console.log(process.env.SHODAN_TOKEN)
 
