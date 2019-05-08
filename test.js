@@ -21,15 +21,15 @@ const client = new elasticsearch.Client({
 //   }
 // });
 
-// client.count(
-//   {
-//     index: "van_test",
-//     type: "host",
-//     body: {
-//       query: { 'match_all': {} }
-//     }
-//   }
-// ).then(count => console.log("count", count));
+client.count(
+  {
+    index: "shodan_host",
+    type: "host",
+    body: {
+      query: { 'match_all': {} }
+    }
+  }
+).then(count => console.log("count", count));
 
 // client.deleteByQuery({
 //   index: 'shodan_host',
@@ -41,13 +41,13 @@ const client = new elasticsearch.Client({
 //     console.log(err, resp);
 // });
 
-client.indices.delete({
-  index: 'shodan_host'
-}, function(err, res) {
+// client.indices.delete({
+//   index: 'van_test'
+// }, function(err, res) {
 
-  if (err) {
-      console.error(err.message);
-  } else {
-      console.log('Indexes have been deleted!');
-  }
-});
+//   if (err) {
+//       console.error(err.message);
+//   } else {
+//       console.log('Indexes have been deleted!');
+//   }
+// });
