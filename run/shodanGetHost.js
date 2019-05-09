@@ -3,14 +3,14 @@ const fs = require("fs");
 const _ = require("lodash");
 const ShodanRequest = require("../lib/ShodanRequest");
 const ShodanElasticSearch = require("../lib/ShodanElasticSearch");
-// const Queue = require('./awsSqsReceiver');
+const SQS = require('../lib/AwsSqs');
 
+const awsSqs = new SQS();
 const shodanReq = new ShodanRequest({
   shodanToken: process.env.SHODAN_TOKEN,
   minTime: 2000,
   maxConcurrent: 8
 });
-
 const shodanES = new ShodanElasticSearch({
   host:
     "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
@@ -34,8 +34,24 @@ shodanES
     }, 3)
   )
   .then(data => {
-    const hostData = shodanES.purifyData(data, UNUSED_PROPERTIES)
-    return shodanES.batchInsert(hostData, 'van_test', 'host', keywords[0])
+    const hostList = shodanES.purifyData(data, keywords[0], UNUSED_PROPERTIES);
+    const domainList = hostList.map(host => ({
+      hostId: host.hostId,
+      domain: host.groove.business_domain
+    }));
+    const domainChunkList = _.chunk(domainList, 10);
+    const insertQueue = awsSqs.createQueue('domain.fifo').then(res => {
+      var params = {
+        entries: domainChunkList,
+        groupId: 'domain',
+        queueUrl: res.QueueUrl
+      };
+      return awsSqs.sendMessageBatch(params).then(data => {
+        console.log("Sent message with payload", data);
+      });
+    });
+    const insertES = shodanES.batchInsert(hostList, 'van_test', 'host');
+    return Promise.all([insertQueue, insertES]);
   })
   .then(() => {
     console.log('DONE');
@@ -44,6 +60,12 @@ shodanES
     //   process.exit(0);
     // });
   });
+
+// shodanES
+//   .createIndexIfNotExist("van_test")
+//   .then(() =>
+//     shodanES.update('1', { a: 5, b: 6 }, 'van_test', 'host')
+//   )
 
 // Queue.receiveMessage().then(message => {
 //   console.log('receive', message.Body)

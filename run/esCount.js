@@ -10,4 +10,4 @@ const shodanES = new ShodanElasticSearch({
 //   console.log("-- Client Health --", resp);
 // });
 
-shodanES.count('shodan_host', 'host').then(count => console.log("count", count));
+shodanES.count('van_test', 'host').then(count => console.log("count", count));

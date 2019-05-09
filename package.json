@@ -10,7 +10,8 @@
     "wap": "node lib/Wappalyzer.js",
     "receive": "node run/awsSqsReceiver.js",
     "send": "node run/awsSqsSender.js",
-    "get-host": "node run/shodanGetHost.js"
+    "get-host": "node run/shodanGetHost.js",
+    "explore": "node run/exploreDomain.js"
   },
   "author": "",
   "license": "ISC",

@@ -41,7 +41,7 @@ shodanES
     }, 3)
   )
   .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
-  .then(hostData => shodanES.batchInsert(hostData, 'van_test', 'host', keywords[0]))
+  .then(hostList => shodanES.batchInsert(hostList, 'van_test', 'host', keywords[0]))
   .then(() => {
     console.log('DONE');
     // message.ack().then(data => {
