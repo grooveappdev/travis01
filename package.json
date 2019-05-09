@@ -4,11 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node ./test.js",
+    "es-count": "node run/esCount.js",
+    "es-del": "node run/esDelete.js",
     "start": "node .",
-    "tor": "node tor.js",
-    "wap": "node wappalyzer.js",
-    "queue": "node awsSqsReceiver.js"
+    "wap": "node lib/Wappalyzer.js",
+    "receive": "node run/awsSqsReceiver.js",
+    "send": "node run/awsSqsSender.js",
+    "get-host": "node run/shodanGetHost.js"
   },
   "author": "",
   "license": "ISC",

@@ -1,8 +1,8 @@
 require('dotenv').config()
 const fs = require("fs");
 const _ = require("lodash");
-const ShodanRequest = require("./ShodanRequest");
-const ShodanElasticSearch = require("./ShodanElasticSearch");
+const ShodanRequest = require("./lib/ShodanRequest");
+const ShodanElasticSearch = require("./lib/ShodanElasticSearch");
 // const Queue = require('./awsSqsReceiver');
 
 const shodanReq = new ShodanRequest({
@@ -33,42 +33,23 @@ const EDIT_PROPERTIES = [
 ];
 
 const keywords = ['wsgi', 'country:GB', 'port:443'];
-  shodanES
-    .createIndexIfNotExist("van_test")
-    .then(() =>
-      shodanReq.getHosts(keywords.join(' '), {
-        timeout: 120000
-      }, 3)
-    )
-    .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
-    .then(hostData => {  
-      const body = shodanES.buildShodanBulk(hostData, "van_test", "host", keywords[0]);
-      console.log('final body', body.length)
-      shodanES.client
-        .bulk({
-          body
-        })
-        .then(res => {
-          console.log('DONE');
-          message.ack().then(data => {
-            console.log('ack', data)
-            process.exit(0);
-          });
-          // fs.writeFile(
-          //   "./data.json",
-          //   JSON.stringify(hostData),
-          //   "utf8",
-          //   () => {
-          //     console.log("done data.json");
-          //     message.ack().then(data => {
-          //       console.log('ack', data)
-          //       process.exit(0);
-          //     });
-          //   }
-          // );
-        })
-        .catch(err => console.log("error", err));
-    });
+shodanES
+  .createIndexIfNotExist("van_test")
+  .then(() =>
+    shodanReq.getHosts(keywords.join(' '), {
+      timeout: 120000
+    }, 3)
+  )
+  .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
+  .then(hostData => shodanES.batchInsert(hostData, 'van_test', 'host', keywords[0]))
+  .then(() => {
+    console.log('DONE');
+    // message.ack().then(data => {
+    //   console.log('ack', data)
+    //   process.exit(0);
+    // });
+  });
+
 // Queue.receiveMessage().then(message => {
 //   console.log('receive', message.Body)
   
