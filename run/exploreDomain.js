@@ -32,6 +32,9 @@ awsSqs.receiveMessage(queueURL).then(message => {
     return shodanES.batchUpdate(partialHostList, 'van_test', 'host');
   }).then(() => {
     console.log('update completed')
-    message.ack().then(() => console.log('message ACK'));
+    message.ack().then(() => {
+      console.log('message ACK');
+      process.exit(0);
+    });
   });
 }).catch(err => console.log(err.message))
