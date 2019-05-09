@@ -4,4 +4,4 @@ node_js:
 cache:
   directories:
     - "node_modules"
-script: npm run get-host
+script: npm run explore
