@@ -72,11 +72,6 @@ shodanES.client.search({
     }
 });
 
-// Queue.receiveMessage().then(message => {
-//   console.log('receive', message.Body)
-  
-// });
-
 // console.log(process.env.SHODAN_TOKEN)
 
 // shodanES
