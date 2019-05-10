@@ -4,6 +4,7 @@ const _ = require("lodash");
 const ShodanRequest = require("../lib/ShodanRequest");
 const ShodanElasticSearch = require("../lib/ShodanElasticSearch");
 const SQS = require('../lib/AwsSqs');
+const config = require('../config.json');
 
 const awsSqs = new SQS();
 const shodanReq = new ShodanRequest({
@@ -12,8 +13,7 @@ const shodanReq = new ShodanRequest({
   maxConcurrent: 8
 });
 const shodanES = new ShodanElasticSearch({
-  host:
-    "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
+  host: config.esHost,
   requestTimeout: 180000
 });
 

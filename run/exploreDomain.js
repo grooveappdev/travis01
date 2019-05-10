@@ -3,11 +3,11 @@ const fs = require("fs");
 const _ = require("lodash");
 const ShodanElasticSearch = require("../lib/ShodanElasticSearch");
 const SQS = require('../lib/AwsSqs');
+const config = require('../config.json');
 
 const awsSqs = new SQS();
 const shodanES = new ShodanElasticSearch({
-  host:
-    "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
+  host: config.esHost,
   requestTimeout: 180000
 });
 

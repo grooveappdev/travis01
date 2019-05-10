@@ -3,6 +3,7 @@ const fs = require("fs");
 const _ = require("lodash");
 const ShodanRequest = require("./lib/ShodanRequest");
 const ShodanElasticSearch = require("./lib/ShodanElasticSearch");
+const config = require('./config.json');
 // const Queue = require('./awsSqsReceiver');
 
 const shodanReq = new ShodanRequest({
@@ -12,8 +13,7 @@ const shodanReq = new ShodanRequest({
 });
 
 const shodanES = new ShodanElasticSearch({
-  host:
-    "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
+  host: config.esHost,
   requestTimeout: 180000
 });
 
@@ -33,22 +33,44 @@ const EDIT_PROPERTIES = [
 ];
 
 const keywords = ['wsgi', 'country:GB', 'port:443'];
-shodanES
-  .createIndexIfNotExist("van_test")
-  .then(() =>
-    shodanReq.getHosts(keywords.join(' '), {
-      timeout: 120000
-    }, 3)
-  )
-  .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
-  .then(hostList => shodanES.batchInsert(hostList, 'van_test', 'host', keywords[0]))
-  .then(() => {
-    console.log('DONE');
-    // message.ack().then(data => {
-    //   console.log('ack', data)
-    //   process.exit(0);
-    // });
-  });
+// shodanES
+//   .createIndexIfNotExist("van_test")
+//   .then(() =>
+//     shodanReq.getHosts(keywords.join(' '), {
+//       timeout: 120000
+//     }, 3)
+//   )
+//   .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
+//   .then(hostList => shodanES.batchInsert(hostList, 'van_test', 'host', keywords[0]))
+//   .then(() => {
+//     console.log('DONE');
+//     // message.ack().then(data => {
+//     //   console.log('ack', data)
+//     //   process.exit(0);
+//     // });
+//   });
+shodanES.client.search({
+  index: 'shodan_host',
+  type: 'host',
+  body: {
+    query: {
+      wildcard: { "groove.business_domain": "*uk" } // match, term, match_all, wildcard
+    },
+  }
+},function (error, response,status) {
+    if (error){
+      console.log("search error: "+error)
+    }
+    else {
+      // console.log("--- Response ---");
+      // console.log(response);
+      console.log("--- Hits ---");
+      console.log(response.hits.hits.length)
+      // response.hits.hits.forEach(function(hit){
+      //   console.log(hit);
+      // })
+    }
+});
 
 // Queue.receiveMessage().then(message => {
 //   console.log('receive', message.Body)

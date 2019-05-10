@@ -1,8 +1,8 @@
 const ShodanElasticSearch = require("../lib/ShodanElasticSearch");
+const config = require('../config.json');
 
 const shodanES = new ShodanElasticSearch({
-  host:
-    "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
+  host: config.esHost,
   requestTimeout: 180000
 });
 
