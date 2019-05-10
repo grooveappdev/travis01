@@ -11,7 +11,8 @@
     "receive": "node run/awsSqsReceiver.js",
     "send": "node run/awsSqsSender.js",
     "get-host": "node run/shodanGetHost.js",
-    "explore": "node run/exploreDomain.js"
+    "explore": "node run/exploreDomain.js",
+    "init": "node run/initKeyword.js"
   },
   "author": "",
   "license": "ISC",

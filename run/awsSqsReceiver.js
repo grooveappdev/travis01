@@ -3,7 +3,7 @@ const config = require('../config.json');
 
 const awsSqs = new SQS();
 
-const queueURL = `${config.queueHost}/test2.fifo`;
+const queueURL = `${config.queueHost}/keyword.fifo`;
 
 awsSqs.receiveMessage(queueURL).then(data => {
   console.log(data);

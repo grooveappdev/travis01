@@ -24,51 +24,45 @@ const UNUSED_PROPERTIES = [
   "ssl.chain",
   "ssl.dhparams.generator"
 ];
+const queueURL = `${config.queueHost}/${config.queueKeywordName}`;
 
-const keywords = ['wsgi', 'country:GB', 'port:443'];
-shodanES
-  .createIndexIfNotExist(config.esIndexName)
-  .then(() =>
-    shodanReq.getHosts(keywords.join(' '), {
-      timeout: 120000
-    }, 3)
-  )
-  .then(data => {
-    const hostList = shodanES.purifyData(data, keywords[0], UNUSED_PROPERTIES);
-    const domainList = hostList.map(host => ({
-      hostId: host.hostId,
-      domain: host.groove.business_domain
-    }));
-    const domainChunkList = _.chunk(domainList, 10);
-    const insertQueue = awsSqs.createQueue(config.queueDomainName).then(res => {
-      var params = {
-        entries: domainChunkList,
-        groupId: 'domain',
-        queueUrl: res.QueueUrl
-      };
-      return awsSqs.sendMessageBatch(params).then(data => {
-        console.log("Sent message with payload", data);
+awsSqs.receiveMessage(queueURL).then(message => {
+  console.log('receive', message.Body);
+  const keyword = awsSqs.parseMessage(message.Body);
+  const fullKeyword = [keyword, 'country:GB', 'port:443'];
+  shodanES
+    .createIndexIfNotExist(config.esIndexName)
+    .then(() =>
+      shodanReq.getHosts(fullKeyword.join(' '), {
+        timeout: 120000
+      }, 3)
+    )
+    .then(data => {
+      const hostList = shodanES.purifyData(data, keyword, UNUSED_PROPERTIES);
+      const domainList = hostList.map(host => ({
+        hostId: host.hostId,
+        domain: host.groove.business_domain
+      }));
+      const domainChunkList = _.chunk(domainList, 10);
+      const insertQueue = awsSqs.createQueue(config.queueDomainName).then(res => {
+        var params = {
+          entries: domainChunkList,
+          groupId: 'domain',
+          queueUrl: res.QueueUrl
+        };
+        return awsSqs.sendMessageBatch(params).then(data => {
+          console.log("Sent message with payload", data);
+        });
       });
+      const insertES = shodanES.batchInsert(hostList, config.esIndexName, 'host');
+      return Promise.all([insertQueue, insertES]);
+    })
+    .then(() => {
+      console.log('DONE');
+      // message.ack().then(data => {
+      //   console.log('ack', data)
+      //   process.exit(0);
+      // });
     });
-    const insertES = shodanES.batchInsert(hostList, config.esIndexName, 'host');
-    return Promise.all([insertQueue, insertES]);
-  })
-  .then(() => {
-    console.log('DONE');
-    // message.ack().then(data => {
-    //   console.log('ack', data)
-    //   process.exit(0);
-    // });
-  });
-
-// shodanES
-//   .createIndexIfNotExist(config.esIndexName)
-//   .then(() =>
-//     shodanES.update('1', { a: 5, b: 6 }, config.esIndexName, 'host')
-//   )
-
-// Queue.receiveMessage().then(message => {
-//   console.log('receive', message.Body)
-  
-// });
+});
 
