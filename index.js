@@ -34,14 +34,14 @@ const EDIT_PROPERTIES = [
 
 const keywords = ['wsgi', 'country:GB', 'port:443'];
 // shodanES
-//   .createIndexIfNotExist("van_test")
+//   .createIndexIfNotExist(config.esIndexName)
 //   .then(() =>
 //     shodanReq.getHosts(keywords.join(' '), {
 //       timeout: 120000
 //     }, 3)
 //   )
 //   .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
-//   .then(hostList => shodanES.batchInsert(hostList, 'van_test', 'host', keywords[0]))
+//   .then(hostList => shodanES.batchInsert(hostList, config.esIndexName, 'host', keywords[0]))
 //   .then(() => {
 //     console.log('DONE');
 //     // message.ack().then(data => {
@@ -86,7 +86,7 @@ shodanES.client.search({
 //     .reindex({
 //       body: {
 //         source: {
-//           index: "van_test",
+//           index: config.esIndexName,
 //           query: {
 //             "match_all": {}
 //           }

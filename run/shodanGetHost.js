@@ -27,7 +27,7 @@ const UNUSED_PROPERTIES = [
 
 const keywords = ['wsgi', 'country:GB', 'port:443'];
 shodanES
-  .createIndexIfNotExist("van_test")
+  .createIndexIfNotExist(config.esIndexName)
   .then(() =>
     shodanReq.getHosts(keywords.join(' '), {
       timeout: 120000
@@ -50,7 +50,7 @@ shodanES
         console.log("Sent message with payload", data);
       });
     });
-    const insertES = shodanES.batchInsert(hostList, 'van_test', 'host');
+    const insertES = shodanES.batchInsert(hostList, config.esIndexName, 'host');
     return Promise.all([insertQueue, insertES]);
   })
   .then(() => {
@@ -62,9 +62,9 @@ shodanES
   });
 
 // shodanES
-//   .createIndexIfNotExist("van_test")
+//   .createIndexIfNotExist(config.esIndexName)
 //   .then(() =>
-//     shodanES.update('1', { a: 5, b: 6 }, 'van_test', 'host')
+//     shodanES.update('1', { a: 5, b: 6 }, config.esIndexName, 'host')
 //   )
 
 // Queue.receiveMessage().then(message => {

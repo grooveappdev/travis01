@@ -20,4 +20,4 @@ const shodanES = new ShodanElasticSearch({
 //     console.log(err, resp);
 // });
 
-shodanES.deleteIndex('van_test').then(() => console.log('Indexes have been deleted!'));
+shodanES.deleteIndex(config.esIndexName).then(() => console.log('Indexes have been deleted!'));

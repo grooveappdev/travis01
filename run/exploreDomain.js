@@ -29,7 +29,7 @@ awsSqs.receiveMessage(queueURL).then(message => {
       return partialHost;
     })
   })).then(partialHostList => {
-    return shodanES.batchUpdate(partialHostList, 'van_test', 'host');
+    return shodanES.batchUpdate(partialHostList, config.esIndexName, 'host');
   }).then(() => {
     console.log('update completed')
     message.ack().then(() => {
