@@ -1,8 +1,9 @@
 const SQS = require('../lib/AwsSqs');
+const config = require('../config.json');
 
 const awsSqs = new SQS();
 
-const queueURL = 'https://sqs.ap-southeast-1.amazonaws.com/784184982766/test2.fifo';
+const queueURL = `${config.queueHost}/test2.fifo`;
 
 awsSqs.receiveMessage(queueURL).then(data => {
   console.log(data);

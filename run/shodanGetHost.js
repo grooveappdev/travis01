@@ -40,7 +40,7 @@ shodanES
       domain: host.groove.business_domain
     }));
     const domainChunkList = _.chunk(domainList, 10);
-    const insertQueue = awsSqs.createQueue('domain.fifo').then(res => {
+    const insertQueue = awsSqs.createQueue(config.queueDomainName).then(res => {
       var params = {
         entries: domainChunkList,
         groupId: 'domain',

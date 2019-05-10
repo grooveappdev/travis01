@@ -1,8 +1,9 @@
 const SQS = require('../lib/AwsSqs');
+const config = require('../config.json');
 
 const awsSqs = new SQS();
 
-const queueName = "test2.fifo";
+const queueName = 'test2.fifo';
 const data = [1,2,3,4];
 
 awsSqs.createQueue(queueName).then(res => {

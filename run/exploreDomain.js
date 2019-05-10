@@ -18,7 +18,7 @@ const EDIT_PROPERTIES = [
   'groove.similar_web.SimilarSites.Rank',
   'groove.similar_web.SimilarSitesByRank.Rank'
 ];
-const queueURL = 'https://sqs.ap-southeast-1.amazonaws.com/784184982766/domain.fifo';
+const queueURL = `${config.queueHost}/${config.queueDomainName}`;
 
 awsSqs.receiveMessage(queueURL).then(message => {
   console.log('receive', message);
