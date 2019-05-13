@@ -59,10 +59,10 @@ awsSqs.receiveMessage(queueURL).then(message => {
     })
     .then(() => {
       console.log('DONE');
-      // message.ack().then(data => {
-      //   console.log('ack', data)
-      //   process.exit(0);
-      // });
+      message.ack().then(data => {
+        console.log('ack', data)
+        process.exit(0);
+      });
     });
 });
 
