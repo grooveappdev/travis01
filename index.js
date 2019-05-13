@@ -4,7 +4,6 @@ const _ = require("lodash");
 const ShodanRequest = require("./lib/ShodanRequest");
 const ShodanElasticSearch = require("./lib/ShodanElasticSearch");
 const config = require('./config.json');
-// const Queue = require('./awsSqsReceiver');
 
 const shodanReq = new ShodanRequest({
   shodanToken: process.env.SHODAN_TOKEN,
@@ -57,7 +56,7 @@ shodanES.client.search({
       wildcard: { "groove.business_domain": "*uk" } // match, term, match_all, wildcard
     },
   }
-},function (error, response,status) {
+},function (error, response, status) {
     if (error){
       console.log("search error: "+error)
     }
