@@ -48,7 +48,8 @@ awsSqs.receiveMessage(queueURL).then(message => {
         var params = {
           entries: domainChunkList,
           groupId: 'domain',
-          queueUrl: res.QueueUrl
+          queueUrl: res.QueueUrl,
+          distributeGroup: true
         };
         return awsSqs.sendMessageBatch(params).then(data => {
           console.log("Sent message with payload", data);
