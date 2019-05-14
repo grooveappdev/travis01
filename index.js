@@ -10,7 +10,6 @@ const shodanReq = new ShodanRequest({
   minTime: 2000,
   maxConcurrent: 8
 });
-
 const shodanES = new ShodanElasticSearch({
   host: config.esHost,
   requestTimeout: 180000
