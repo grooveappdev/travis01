@@ -15,7 +15,7 @@ const keywords = [
 awsSqs.createQueue(config.queueKeywordName).then(res => {
   var params = {
     entries: keywords,
-    groupId: 'test',
+    groupId: 'keyword',
     queueUrl: res.QueueUrl
   };
   return awsSqs.sendMessageBatch(params).then(data => {

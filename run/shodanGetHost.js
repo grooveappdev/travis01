@@ -43,7 +43,7 @@ awsSqs.receiveMessage(queueURL).then(message => {
         hostId: host.hostId,
         domain: host.groove.business_domain
       }));
-      const domainChunkList = _.chunk(domainList, 10);
+      const domainChunkList = _.chunk(domainList, 20);
       const insertQueue = awsSqs.createQueue(config.queueDomainName).then(res => {
         var params = {
           entries: domainChunkList,
