@@ -17,5 +17,8 @@ awsSqs.createQueue(queueName).then(res => {
   });
 });
 
-// const queueUrl = 'https://sqs.ap-southeast-1.amazonaws.com/784184982766/domain.fifo';
+const queueUrl = 'https://sqs.ap-southeast-1.amazonaws.com/784184982766/domain2.fifo';
+
 // awsSqs.deleteQueue(queueUrl).then(res => console.log(res));
+
+// awsSqs.getMessageCount(queueUrl).then(res => console.log(res));
