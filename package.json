@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/bigquery": "^3.0.0",
     "aws-sdk": "^2.450.0",
     "bottleneck": "^2.18.0",
     "crawler": "^1.2.1",
