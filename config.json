@@ -1,5 +1,5 @@
 {
-  "esIndexName": "van_test",
+  "esIndexName": "shodan_host",
   "esHost": "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
   "queueHost": "https://sqs.ap-southeast-1.amazonaws.com/784184982766",
   "queueKeywordName": "keyword.fifo",
