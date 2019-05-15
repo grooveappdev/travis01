@@ -1,5 +1,6 @@
 const SQS = require('../lib/AwsSqs');
 const config = require('../config.json');
+const fs = require("fs");
 
 const awsSqs = new SQS();
 
@@ -22,3 +23,12 @@ const queueUrl = 'https://sqs.ap-southeast-1.amazonaws.com/784184982766/domain.f
 // awsSqs.deleteQueue(queueUrl).then(res => console.log(res));
 
 // awsSqs.getMessageCount(queueUrl).then(res => console.log(res));
+
+// console.log(process.env.GOOGLE_CREDENTIAL);
+
+//  fs.writeFile(
+//   "./credential.json",
+//   process.env.GOOGLE_CREDENTIAL,
+//   { encoding: 'base64' },
+//   () => console.log("done credential.json")
+// );
