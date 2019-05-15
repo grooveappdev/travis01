@@ -197,6 +197,36 @@ const SCHEMA =  [
             type: 'STRING',
           },
           {
+            name: 'issuer',
+            type: 'RECORD',
+            fields: [
+              {
+                name: 'C',
+                type: 'STRING',
+              },
+              {
+                name: 'CN',
+                type: 'STRING',
+              },
+              {
+                name: 'L',
+                type: 'STRING',
+              },
+              {
+                name: 'O',
+                type: 'STRING',
+              },
+              {
+                name: 'OU',
+                type: 'STRING',
+              },
+              {
+                name: 'ST',
+                type: 'STRING',
+              },
+            ],
+          },
+          {
             name: 'pubkey',
             type: 'RECORD',
             fields: [
@@ -219,11 +249,35 @@ const SCHEMA =  [
             type: 'RECORD',
             fields: [
               {
-                name: 'bits',
+                name: 'C',
                 type: 'STRING',
               },
               {
-                name: 'type',
+                name: 'CN',
+                type: 'STRING',
+              },
+              {
+                name: 'L',
+                type: 'STRING',
+              },
+              {
+                name: 'O',
+                type: 'STRING',
+              },
+              {
+                name: 'OU',
+                type: 'STRING',
+              },
+              {
+                name: 'ST',
+                type: 'STRING',
+              },
+              {
+                name: 'businessCategory',
+                type: 'STRING',
+              },
+              {
+                name: 'emailAddress',
                 type: 'STRING',
               },
             ],
@@ -297,8 +351,5 @@ const SCHEMA =  [
     ]
   },
 ];
-// ssl.cert.extensions
-// ssl.cert.issuer
-// ssl.cert.subject
 
 module.exports = SCHEMA;
