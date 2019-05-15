@@ -3,6 +3,7 @@ const fs = require("fs");
 const _ = require("lodash");
 const ShodanRequest = require("./lib/ShodanRequest");
 const ShodanElasticSearch = require("./lib/ShodanElasticSearch");
+const GoogleBigQuery = require("./lib/BigQuery");
 const config = require('./config.json');
 
 const shodanReq = new ShodanRequest({
@@ -14,6 +15,7 @@ const shodanES = new ShodanElasticSearch({
   host: config.esHost,
   requestTimeout: 180000
 });
+const bigQuery = new GoogleBigQuery();
 
 const UNUSED_PROPERTIES = [
   "http.html",
@@ -30,20 +32,25 @@ const EDIT_PROPERTIES = [
   'groove.similar_web.SimilarSitesByRank.Rank'
 ];
 
-const keywords = ['wsgi', 'country:GB', 'port:443'];
-shodanReq.getHosts(keywords.join(' '), {
-  timeout: 120000
-}, 3)
-  .then(data => {
-    console.log('DONE');
-    const finalData = shodanES.purifyData(data, 'wsgi', UNUSED_PROPERTIES)
-    fs.writeFile(
-      "./data.json",
-      JSON.stringify(finalData),
-      "utf8",
-      () => console.log("done data.json")
-    );
-  });
+// const keywords = ['wsgi', 'country:GB', 'port:443'];
+// bigQuery.initClient().then(() => {
+//   bigQuery.createTable('van_test', 'table_test', schema).then(res => {
+//     console.log(res);
+//   }).catch(err => console.log('err', err))
+// });
+// shodanReq.getHosts(keywords.join(' '), {
+//   timeout: 120000
+// }, 3)
+//   .then(data => {
+//     console.log('DONE');
+//     const finalData = shodanES.purifyData(data, 'wsgi', UNUSED_PROPERTIES)
+//     fs.writeFile(
+//       "./data.json",
+//       JSON.stringify(finalData),
+//       "utf8",
+//       () => console.log("done data.json")
+//     );
+//   });
 
 // shodanES.client.search({
 //   index: 'shodan_host',
@@ -67,8 +74,6 @@ shodanReq.getHosts(keywords.join(' '), {
 //       // })
 //     }
 // });
-
-// console.log(process.env.SHODAN_TOKEN)
 
 // shodanES
 //   .createIndexIfNotExist("shodan_host")
