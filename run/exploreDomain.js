@@ -2,6 +2,7 @@ require('dotenv').config()
 const fs = require("fs");
 const _ = require("lodash");
 const ShodanElasticSearch = require("../lib/ShodanElasticSearch");
+const ShodanRequest = require("../lib/ShodanRequest");
 const SQS = require('../lib/AwsSqs');
 const config = require('../config.json');
 
@@ -9,6 +10,11 @@ const awsSqs = new SQS();
 const shodanES = new ShodanElasticSearch({
   host: config.esHost,
   requestTimeout: 180000
+});
+const shodanReq = new ShodanRequest({
+  shodanToken: process.env.SHODAN_TOKEN,
+  minTime: 2000,
+  maxConcurrent: 8
 });
 
 const EDIT_PROPERTIES = [
@@ -24,7 +30,7 @@ awsSqs.receiveMessage(queueURL).then(message => {
   console.log('receive', message);
   const domainChunk = awsSqs.parseMessage(message.Body);
   return Promise.all(domainChunk.map(chunk => {
-    return shodanES.exploreDomain(chunk.domain, EDIT_PROPERTIES).then(partialHost => {
+    return shodanReq.exploreDomain(chunk.domain, EDIT_PROPERTIES).then(partialHost => {
       partialHost.hostId = chunk.hostId;
       return partialHost;
     })

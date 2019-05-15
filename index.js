@@ -39,7 +39,7 @@ shodanReq.getHosts(keywords.join(' '), {
 }, 3)
   .then(data => {
     console.log('DONE');
-    const finalData = shodanES.purifyData(data, 'wsgi', UNUSED_PROPERTIES);
+    const finalData = shodanReq.purifyData(data, 'wsgi', UNUSED_PROPERTIES);
     const bigQueryData = bigQuery.parseBigQueryData(finalData);
     bigQuery.initClient().then(() => {
       bigQuery.insertData('van_test', 'shodan', bigQueryData).then(res => {

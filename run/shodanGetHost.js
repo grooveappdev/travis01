@@ -38,7 +38,7 @@ awsSqs.receiveMessage(queueURL).then(message => {
       }, 3)
     )
     .then(data => {
-      const hostList = shodanES.purifyData(data, keyword, UNUSED_PROPERTIES);
+      const hostList = shodanReq.purifyData(data, keyword, UNUSED_PROPERTIES);
       const domainList = hostList.map(host => ({
         hostId: host.hostId,
         domain: host.groove.business_domain
