@@ -89,8 +89,22 @@ const SCHEMA =  [
       },
       {
         name: 'redirects',
-        type: 'STRING',
+        type: 'RECORD',
         mode: 'REPEATED',
+        fields: [
+          {
+            name: 'host',
+            type: 'STRING',
+          },
+          {
+            name: 'data',
+            type: 'STRING',
+          },
+          {
+            name: 'location',
+            type: 'STRING',
+          },
+        ]
       },
       {
         name: 'server',

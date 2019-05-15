@@ -32,25 +32,34 @@ const EDIT_PROPERTIES = [
   'groove.similar_web.SimilarSitesByRank.Rank'
 ];
 
-// const keywords = ['wsgi', 'country:GB', 'port:443'];
-// bigQuery.initClient().then(() => {
-//   bigQuery.createTable('van_test', 'table_test', schema).then(res => {
-//     console.log(res);
-//   }).catch(err => console.log('err', err))
-// });
-// shodanReq.getHosts(keywords.join(' '), {
-//   timeout: 120000
-// }, 3)
-//   .then(data => {
-//     console.log('DONE');
-//     const finalData = shodanES.purifyData(data, 'wsgi', UNUSED_PROPERTIES)
-//     fs.writeFile(
-//       "./data.json",
-//       JSON.stringify(finalData),
-//       "utf8",
-//       () => console.log("done data.json")
-//     );
-//   });
+const keywords = ['wsgi', 'country:GB', 'port:443'];
+
+shodanReq.getHosts(keywords.join(' '), {
+  timeout: 120000
+}, 3)
+  .then(data => {
+    console.log('DONE');
+    const finalData = shodanES.purifyData(data, 'wsgi', UNUSED_PROPERTIES);
+    const bigQueryData = bigQuery.parseBigQueryData(finalData);
+    bigQuery.initClient().then(() => {
+      bigQuery.insertData('van_test', 'shodan', bigQueryData).then(res => {
+        console.log(res);
+        fs.writeFile(
+          "./bigquery.json",
+          JSON.stringify(res),
+          "utf8",
+          () => console.log("done bigquery.json")
+        );
+      }).catch(err => {
+        fs.writeFile(
+          "./bigquery.json",
+          JSON.stringify(err),
+          "utf8",
+          () => console.log("done bigquery.json")
+        );
+      })
+    });
+  });
 
 // shodanES.client.search({
 //   index: 'shodan_host',
