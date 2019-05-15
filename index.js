@@ -31,44 +31,42 @@ const EDIT_PROPERTIES = [
 ];
 
 const keywords = ['wsgi', 'country:GB', 'port:443'];
-// shodanES
-//   .createIndexIfNotExist(config.esIndexName)
-//   .then(() =>
-//     shodanReq.getHosts(keywords.join(' '), {
-//       timeout: 120000
-//     }, 3)
-//   )
-//   .then(data => shodanES.parseShodanHostData(data, UNUSED_PROPERTIES, EDIT_PROPERTIES))
-//   .then(hostList => shodanES.batchInsert(hostList, config.esIndexName, 'host', keywords[0]))
-//   .then(() => {
-//     console.log('DONE');
-//     // message.ack().then(data => {
-//     //   console.log('ack', data)
-//     //   process.exit(0);
-//     // });
-//   });
-shodanES.client.search({
-  index: 'shodan_host',
-  type: 'host',
-  body: {
-    query: {
-      wildcard: { "groove.business_domain": "*uk" } // match, term, match_all, wildcard
-    },
-  }
-},function (error, response, status) {
-    if (error){
-      console.log("search error: "+error)
-    }
-    else {
-      // console.log("--- Response ---");
-      // console.log(response);
-      console.log("--- Hits ---");
-      console.log(response.hits.hits.length)
-      // response.hits.hits.forEach(function(hit){
-      //   console.log(hit);
-      // })
-    }
-});
+shodanReq.getHosts(keywords.join(' '), {
+  timeout: 120000
+}, 3)
+  .then(data => {
+    console.log('DONE');
+    const finalData = shodanES.purifyData(data, 'wsgi', UNUSED_PROPERTIES)
+    fs.writeFile(
+      "./data.json",
+      JSON.stringify(finalData),
+      "utf8",
+      () => console.log("done data.json")
+    );
+  });
+
+// shodanES.client.search({
+//   index: 'shodan_host',
+//   type: 'host',
+//   body: {
+//     query: {
+//       wildcard: { "groove.business_domain": "*uk" } // match, term, match_all, wildcard
+//     },
+//   }
+// },function (error, response, status) {
+//     if (error){
+//       console.log("search error: "+error)
+//     }
+//     else {
+//       // console.log("--- Response ---");
+//       // console.log(response);
+//       console.log("--- Hits ---");
+//       console.log(response.hits.hits.length)
+//       // response.hits.hits.forEach(function(hit){
+//       //   console.log(hit);
+//       // })
+//     }
+// });
 
 // console.log(process.env.SHODAN_TOKEN)
 
