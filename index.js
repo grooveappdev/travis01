@@ -32,17 +32,18 @@ const EDIT_PROPERTIES = [
   'groove.similar_web.SimilarSitesByRank.Rank'
 ];
 
-const keywords = ['wsgi', 'country:GB', 'port:443'];
+const key = 'csrftoken';
+const keywords = [key, 'country:GB', 'port:443'];
 
 shodanReq.getHosts(keywords.join(' '), {
   timeout: 120000
 }, 3)
   .then(data => {
     console.log('DONE');
-    const finalData = shodanReq.purifyData(data, 'wsgi', UNUSED_PROPERTIES);
+    const finalData = shodanReq.purifyData(data, key, UNUSED_PROPERTIES);
     const bigQueryData = bigQuery.parseBigQueryData(finalData);
     bigQuery.initClient().then(() => {
-      bigQuery.insertData('van_test', 'shodan', bigQueryData).then(res => {
+      bigQuery.insertDataAsChunk('van_test', 'shodan', bigQueryData, 100).then(res => {
         console.log(res);
         fs.writeFile(
           "./bigquery.json",
