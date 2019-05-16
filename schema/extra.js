@@ -118,11 +118,11 @@ const SCHEMA =  [
   },
   {
     name: 'OrganicKeywordsRollingUniqueCount',
-    type: 'BOOLEAN',
+    type: 'STRING',
   },
   {
     name: 'OrganicSearchShare',
-    type: 'BOOLEAN',
+    type: 'STRING',
   },
   {
     name: 'PaidKeywordsRollingUniqueCount',
@@ -130,11 +130,11 @@ const SCHEMA =  [
   },
   {
     name: 'PaidSearchShare',
-    type: 'BOOLEAN',
+    type: 'STRING',
   },
   {
     name: 'ReachMonths',
-    type: 'BOOLEAN',
+    type: 'STRING',
   },
   {
     name: 'RedirectUrl',
@@ -142,11 +142,11 @@ const SCHEMA =  [
   },
   {
     name: 'ReferralsRatio',
-    type: 'BOOLEAN',
+    type: 'STRING',
   },
   {
     name: 'SearchRatio',
-    type: 'BOOLEAN',
+    type: 'STRING',
   },
   {
     name: 'SimilarSites',
@@ -382,10 +382,10 @@ const SCHEMA =  [
         name: 'Mail',
         type: 'STRING',
       },
-      {
-        name: 'Paid Referrals',
-        type: 'STRING',
-      },
+      // {
+      //   name: 'Paid Referrals',
+      //   type: 'STRING',
+      // },
       {
         name: 'Direct',
         type: 'STRING',

@@ -46,9 +46,31 @@ const domains = [
   'walkerhamill.com',
 ]
 
-Promise.all(domains.map(d => shodanReq.exploreDomain(d, EDIT_PROPERTIES)))
+Promise.all(domains.map(d => shodanReq.exploreDomain(d, EDIT_PROPERTIES).then(extra => {
+  extra.hostId = d;
+  return extra;
+})))
   .then(data => {
     console.log('DONE');
+    const bigQueryData = bigQuery.parseBigQueryData(data);
+    bigQuery.initClient().then(() => {
+      bigQuery.insertDataAsChunk('van_test', 'extra', bigQueryData, 100).then(res => {
+        console.log(res);
+        fs.writeFile(
+          "./bigquery.json",
+          JSON.stringify(res),
+          "utf8",
+          () => console.log("done bigquery.json")
+        );
+      }).catch(err => {
+        fs.writeFile(
+          "./bigquery.json",
+          JSON.stringify(err),
+          "utf8",
+          () => console.log("done bigquery.json")
+        );
+      })
+    });
     fs.writeFile(
       "./data.json",
       JSON.stringify(data),
