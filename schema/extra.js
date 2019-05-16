@@ -426,6 +426,11 @@ const SCHEMA =  [
       },
     ]
   },
+  {
+    name: 'contact',
+    type: 'STRING',
+    mode: 'REPEATED',
+  },
 ];
 
 // EstimatedMonthlyVisits
