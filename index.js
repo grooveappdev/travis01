@@ -49,12 +49,12 @@ const domains = [
 bigQuery.initClient().then(() => {
   const data = [
     {
-      hostId: '1',
-      hostName: 'A'
+      hostId: '3',
+      hostName: 'c'
     },
     {
-      hostId: '2',
-      hostName: 'B'
+      hostId: '4',
+      hostName: 'd'
     }
   ]
   const bigQueryData = bigQuery.parseBigQueryData(data);
