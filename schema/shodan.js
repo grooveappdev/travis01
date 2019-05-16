@@ -350,6 +350,31 @@ const SCHEMA =  [
       },
     ]
   },
+  {
+    name: 'business_domain',
+    type: 'STRING',
+  },
+  {
+    name: 'httpComponents',
+    type: 'STRING',
+    mode: 'REPEATED',
+  },
+  {
+    name: 'vulns',
+    type: 'RECORD',
+    fields: [
+      {
+        name: 'all',
+        type: 'STRING',
+        mode: 'REPEATED',
+      },
+      {
+        name: 'verified',
+        type: 'STRING',
+        mode: 'REPEATED',
+      },
+    ]
+  },
 ];
 
 module.exports = SCHEMA;
