@@ -97,6 +97,7 @@ bigQuery.initClient().then(() => {
 //       () => console.log("done data.json")
 //     );
 //   });
+
 // shodanReq.exploreDomain('pipelineservicesuk.com', EDIT_PROPERTIES)
 //   .then(data => {
 //     console.log('DONE');
