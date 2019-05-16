@@ -8,6 +8,8 @@ const SQS = require('../lib/AwsSqs');
 const config = require('../config.json');
 const schema = require('../schema/extra')
 
+console.log('TESTTTTT')
+
 const awsSqs = new SQS();
 const shodanES = new ShodanElasticSearch({
   host: config.esHost,
