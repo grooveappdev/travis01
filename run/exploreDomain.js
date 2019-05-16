@@ -18,11 +18,9 @@ const shodanReq = new ShodanRequest({
 });
 
 const EDIT_PROPERTIES = [
-  'groove.similar_web.CategoryRank.Rank',
-  'groove.similar_web.CountryRank.Rank',
-  'groove.similar_web.GlobalRank.Rank',
-  'groove.similar_web.SimilarSites.Rank',
-  'groove.similar_web.SimilarSitesByRank.Rank'
+  'CategoryRank.Rank',
+  'CountryRank.Rank',
+  'GlobalRank.Rank',
 ];
 const queueURL = `${config.queueHost}/${config.queueDomainName}`;
 
@@ -30,9 +28,9 @@ awsSqs.receiveMessage(queueURL).then(message => {
   console.log('receive', message);
   const domainChunk = awsSqs.parseMessage(message.Body);
   return Promise.all(domainChunk.map(chunk => {
-    return shodanReq.exploreDomain(chunk.domain, EDIT_PROPERTIES).then(partialHost => {
-      partialHost.hostId = chunk.hostId;
-      return partialHost;
+    return shodanReq.exploreDomain(chunk.domain, EDIT_PROPERTIES).then(extraInfo => {
+      extraInfo.hostId = chunk.hostId;
+      return extraInfo;
     })
   })).then(partialHostList => {
     return shodanES.batchUpdate(partialHostList, config.esIndexName, 'host');

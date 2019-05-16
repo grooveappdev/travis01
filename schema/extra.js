@@ -151,6 +151,7 @@ const SCHEMA =  [
   {
     name: 'SimilarSites',
     type: 'RECORD',
+    mode: 'REPEATED',
     fields: [
       {
         name: 'Rank',
@@ -169,6 +170,7 @@ const SCHEMA =  [
   {
     name: 'SimilarSitesByRank',
     type: 'RECORD',
+    mode: 'REPEATED',
     fields: [
       {
         name: 'Rank',

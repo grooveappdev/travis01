@@ -25,42 +25,67 @@ const UNUSED_PROPERTIES = [
   "ssl.dhparams.generator"
 ];
 const EDIT_PROPERTIES = [
-  'groove.similar_web.CategoryRank.Rank',
-  'groove.similar_web.CountryRank.Rank',
-  'groove.similar_web.GlobalRank.Rank',
-  'groove.similar_web.SimilarSites.Rank',
-  'groove.similar_web.SimilarSitesByRank.Rank'
+  'CategoryRank.Rank',
+  'CountryRank.Rank',
+  'GlobalRank.Rank',
 ];
 
 const key = 'csrftoken';
 const keywords = [key, 'country:GB', 'port:443'];
 
-shodanReq.getHosts(keywords.join(' '), {
-  timeout: 120000
-}, 3)
+const domains = [
+  'pipelineservicesuk.com',
+  'mobile.shearer-candles.com',
+  'plscivilengineering.com',
+  'enigmapowertrain.co.uk',
+  'niconat.net',
+  'graphic.plc.uk',
+  'iprojects.costain.com',
+  'millerextra.com',
+  'blackmore.co.uk',
+  'walkerhamill.com',
+]
+
+Promise.all(domains.map(d => shodanReq.exploreDomain(d, EDIT_PROPERTIES)))
   .then(data => {
     console.log('DONE');
-    const finalData = shodanReq.purifyData(data, key, UNUSED_PROPERTIES);
-    const bigQueryData = bigQuery.parseBigQueryData(finalData);
-    bigQuery.initClient().then(() => {
-      bigQuery.insertDataAsChunk('van_test', 'shodan', bigQueryData, 100).then(res => {
-        console.log(res);
-        fs.writeFile(
-          "./bigquery.json",
-          JSON.stringify(res),
-          "utf8",
-          () => console.log("done bigquery.json")
-        );
-      }).catch(err => {
-        fs.writeFile(
-          "./bigquery.json",
-          JSON.stringify(err),
-          "utf8",
-          () => console.log("done bigquery.json")
-        );
-      })
-    });
+    fs.writeFile(
+      "./data.json",
+      JSON.stringify(data),
+      "utf8",
+      () => console.log("done data.json")
+    );
   });
+// shodanReq.exploreDomain('pipelineservicesuk.com', EDIT_PROPERTIES)
+//   .then(data => {
+//     console.log('DONE');
+//     fs.writeFile(
+//       "./data.json",
+//       JSON.stringify(data),
+//       "utf8",
+//       () => console.log("done data.json")
+//     );
+//     // const finalData = shodanReq.purifyData(data, key, UNUSED_PROPERTIES);
+//     // const bigQueryData = bigQuery.parseBigQueryData(finalData);
+//     // bigQuery.initClient().then(() => {
+//     //   bigQuery.insertDataAsChunk('van_test', 'shodan', bigQueryData, 100).then(res => {
+//     //     console.log(res);
+//     //     fs.writeFile(
+//     //       "./bigquery.json",
+//     //       JSON.stringify(res),
+//     //       "utf8",
+//     //       () => console.log("done bigquery.json")
+//     //     );
+//     //   }).catch(err => {
+//     //     fs.writeFile(
+//     //       "./bigquery.json",
+//     //       JSON.stringify(err),
+//     //       "utf8",
+//     //       () => console.log("done bigquery.json")
+//     //     );
+//     //   })
+//     // });
+//   });
 
 // shodanES.client.search({
 //   index: 'shodan_host',
