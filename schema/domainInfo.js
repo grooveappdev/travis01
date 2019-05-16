@@ -394,6 +394,38 @@ const SCHEMA =  [
       },
     ]
   },
+  {
+    name: 'wappalyzer',
+    type: 'RECORD',
+    mode: 'REPEATED',
+    fields: [
+      {
+        name: 'name',
+        type: 'STRING',
+      },
+      {
+        name: 'confidence',
+        type: 'STRING',
+      },
+      {
+        name: 'version',
+        type: 'STRING',
+      },
+      {
+        name: 'icon',
+        type: 'STRING',
+      },
+      {
+        name: 'website',
+        type: 'STRING',
+      },
+      {
+        name: 'categories',
+        type: 'STRING',
+        mode: 'REPEATED',
+      },
+    ]
+  },
 ];
 
 // EstimatedMonthlyVisits
