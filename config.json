@@ -2,6 +2,6 @@
   "esIndexName": "shodan_host",
   "esHost": "https://search-asearchtool-yky3obkk6kzzx2dxrbkmlnqk3e.ap-southeast-1.es.amazonaws.com",
   "queueHost": "https://sqs.ap-southeast-1.amazonaws.com/784184982766",
-  "queueKeywordName": "keyword.fifo",
-  "queueDomainName": "domain.fifo"
+  "queueKeywordName": "keyword2.fifo",
+  "queueDomainName": "domain2.fifo"
 }

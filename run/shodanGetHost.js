@@ -3,8 +3,10 @@ const fs = require("fs");
 const _ = require("lodash");
 const ShodanRequest = require("../lib/ShodanRequest");
 const ShodanElasticSearch = require("../lib/ShodanElasticSearch");
+const GoogleBigQuery = require("../lib/BigQuery");
 const SQS = require('../lib/AwsSqs');
 const config = require('../config.json');
+const schema = require('../schema/shodan')
 
 const awsSqs = new SQS();
 const shodanReq = new ShodanRequest({
@@ -16,6 +18,7 @@ const shodanES = new ShodanElasticSearch({
   host: config.esHost,
   requestTimeout: 180000
 });
+const bigQuery = new GoogleBigQuery();
 
 const UNUSED_PROPERTIES = [
   "http.html",
@@ -30,18 +33,20 @@ awsSqs.receiveMessage(queueURL).then(message => {
   console.log('receive', message.Body);
   const keyword = awsSqs.parseMessage(message.Body);
   const fullKeyword = [keyword, 'country:GB', 'port:443'];
-  shodanES
-    .createIndexIfNotExist(config.esIndexName)
-    .then(() =>
-      shodanReq.getHosts(fullKeyword.join(' '), {
+  bigQuery.initClient()
+    .then(() => {
+      return bigQuery.createTableIfNotExist('testing', 'shodan', schema);
+    })
+    .then(() => {
+      return shodanReq.getHosts(fullKeyword.join(' '), {
         timeout: 120000
       }, 3)
-    )
+    })
     .then(data => {
       const hostList = shodanReq.purifyData(data, keyword, UNUSED_PROPERTIES);
       const domainList = hostList.map(host => ({
         hostId: host.hostId,
-        domain: host.groove.business_domain
+        domain: host.business_domain
       }));
       const domainChunkList = _.chunk(domainList, 15);
       const insertQueue = awsSqs.createQueue(config.queueDomainName).then(res => {
@@ -55,8 +60,9 @@ awsSqs.receiveMessage(queueURL).then(message => {
           console.log("Sent message with payload", data);
         });
       });
-      const insertES = shodanES.batchInsert(hostList, config.esIndexName, 'host');
-      return Promise.all([insertQueue, insertES]);
+      const bigQueryData = bigQuery.parseBigQueryData(hostList);
+      const insertBigQuery = bigQuery.insertDataAsChunk('testing', 'shodan', bigQueryData, 100);
+      return Promise.all([insertQueue, insertBigQuery]);
     })
     .then(() => {
       console.log('DONE');
@@ -64,6 +70,14 @@ awsSqs.receiveMessage(queueURL).then(message => {
         console.log('ack', data)
         process.exit(0);
       });
+    })
+    .catch(err => {
+      fs.writeFile(
+        "./bigquery.json",
+        JSON.stringify(err),
+        "utf8",
+        () => console.log("done bigquery.json")
+      );
     });
 });
 
