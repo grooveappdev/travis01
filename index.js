@@ -29,6 +29,7 @@ const EDIT_PROPERTIES = [
   'CountryRank.Rank',
   'GlobalRank.Rank',
 ];
+
 const key = 'csrftoken';
 const keywords = [key, 'country:GB', 'port:443'];
 
