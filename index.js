@@ -46,38 +46,57 @@ const domains = [
   'walkerhamill.com',
 ]
 
-Promise.all(domains.map(d => shodanReq.exploreDomain(d, EDIT_PROPERTIES).then(extra => {
-  extra.hostId = d;
-  return extra;
-})))
-  .then(data => {
-    console.log('DONE');
-    const bigQueryData = bigQuery.parseBigQueryData(data);
-    bigQuery.initClient().then(() => {
-      bigQuery.insertDataAsChunk('van_test', 'extra', bigQueryData, 100).then(res => {
-        console.log(res);
-        fs.writeFile(
-          "./bigquery.json",
-          JSON.stringify(res),
-          "utf8",
-          () => console.log("done bigquery.json")
-        );
-      }).catch(err => {
-        fs.writeFile(
-          "./bigquery.json",
-          JSON.stringify(err),
-          "utf8",
-          () => console.log("done bigquery.json")
-        );
-      })
-    });
-    fs.writeFile(
-      "./data.json",
-      JSON.stringify(data),
-      "utf8",
-      () => console.log("done data.json")
-    );
-  });
+bigQuery.initClient().then(() => {
+  const data = [
+    {
+      hostId: '1',
+      hostName: 'A'
+    },
+    {
+      hostId: '2',
+      hostName: 'B'
+    }
+  ]
+  const bigQueryData = bigQuery.parseBigQueryData(data);
+  bigQuery.insertData('van_test', 'extra', bigQueryData).then(res => {
+    console.log('ok', res)
+  }).catch(err => {
+    console.log('err', err)
+  })
+});
+
+// Promise.all(domains.map(d => shodanReq.exploreDomain(d, EDIT_PROPERTIES).then(extra => {
+//   extra.hostId = d;
+//   return extra;
+// })))
+//   .then(data => {
+//     console.log('DONE');
+//     const bigQueryData = bigQuery.parseBigQueryData(data);
+//     bigQuery.initClient().then(() => {
+//       bigQuery.insertDataAsChunk('van_test', 'extra', bigQueryData, 100).then(res => {
+//         console.log(res);
+//         fs.writeFile(
+//           "./bigquery.json",
+//           JSON.stringify(res),
+//           "utf8",
+//           () => console.log("done bigquery.json")
+//         );
+//       }).catch(err => {
+//         fs.writeFile(
+//           "./bigquery.json",
+//           JSON.stringify(err),
+//           "utf8",
+//           () => console.log("done bigquery.json")
+//         );
+//       })
+//     });
+//     fs.writeFile(
+//       "./data.json",
+//       JSON.stringify(data),
+//       "utf8",
+//       () => console.log("done data.json")
+//     );
+//   });
 // shodanReq.exploreDomain('pipelineservicesuk.com', EDIT_PROPERTIES)
 //   .then(data => {
 //     console.log('DONE');
