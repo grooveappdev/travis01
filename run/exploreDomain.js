@@ -21,7 +21,6 @@ const shodanReq = new ShodanRequest({
   maxConcurrent: 8
 });
 const bigQuery = new GoogleBigQuery();
-
 const EDIT_PROPERTIES = [
   'CategoryRank.Rank',
   'CountryRank.Rank',
