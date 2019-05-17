@@ -64,7 +64,13 @@ awsSqs.receiveMessage(queueURL).then(message => {
       const insertBigQuery = bigQuery.insertDataAsChunk('testing', 'shodan', bigQueryData, 100);
       return Promise.all([insertQueue, insertBigQuery]);
     })
-    .then(() => {
+    .then(res => {
+      fs.writeFile(
+        "./bigquery.json",
+        JSON.stringify(res[1]),
+        "utf8",
+        () => console.log("done bigquery.json")
+      );
       console.log('DONE');
       message.ack().then(data => {
         console.log('ack', data)
